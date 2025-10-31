@@ -1,7 +1,9 @@
 # Data type
+
 String with max length equal to 30
 
-# TODO:
+## TODO
+
 - [ ] Program for creating Data
   - [ ] Manual data creation
   - [ ] Automatic data creation
