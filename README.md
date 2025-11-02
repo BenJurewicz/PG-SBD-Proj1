@@ -7,6 +7,8 @@ String with max length equal to 30
 - [x] Program for creating Data
   - [x] Manual data creation
   - [x] Automatic data creation
+- [ ] Change the file creation such that each string is padded at the end
+        with null chars
 - [ ] Simulate Buffering
   - [ ] Read data in buffers
   - [ ] Write data in buffers
