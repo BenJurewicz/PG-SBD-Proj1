@@ -34,6 +34,8 @@ void BufferedFile::loadBlock(size_t blockIndex) {
         block.push_back("");
         i++;
     }
+
+    currentBlockIndex = blockIndex;
 }
 
 void BufferedFile::flush() {
@@ -50,6 +52,7 @@ void BufferedFile::flush() {
     }
 
     file.flush();
+    isBlockModified = false;
 }
 
 size_t BufferedFile::rIndexToBlockIndex(size_t index) {
@@ -75,4 +78,5 @@ void BufferedFile::write(size_t index, Record data) {
     // writing
     // If len < 30 then padd with \0; if len > 30 then trunacte to 30
     block.at(inBlockIndex) = data;
+    isBlockModified = true;
 }
