@@ -4,9 +4,9 @@ String with max length equal to 30
 
 ## TODO
 
-- [ ] Program for creating Data
-  - [ ] Manual data creation
-  - [ ] Automatic data creation
+- [x] Program for creating Data
+  - [x] Manual data creation
+  - [x] Automatic data creation
 - [ ] Simulate Buffering
   - [ ] Read data in buffers
   - [ ] Write data in buffers
