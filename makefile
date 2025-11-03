@@ -6,3 +6,4 @@ debug:
 
 clean:
 	rm -f out/*
+	rm -f temp/*
