@@ -5,6 +5,7 @@
 
 BufferedFile::BufferedFile(const char* fileName)
     : file(fileName, std::ios::in | std::ios::out), block(recordsPerBlock) {
+    // If file does not exist create it
     if (!file.is_open()) {
         file.open(fileName, std::ios::out);
         file.close();
@@ -78,9 +79,9 @@ void BufferedFile::write(size_t index, Record data) {
     size_t blockIndex = rIndexToBlockIndex(index);
     size_t inBlockIndex = rIndexToInBlockIndex(index);
     loadBlock(blockIndex);
-    // TODO: Add a check to make sure that the data string has lenght 30 before
-    // writing
-    // If len < 30 then padd with \0; if len > 30 then trunacte to 30
+
+    data.resize(recordSize);
+
     block.at(inBlockIndex) = data;
     isBlockModified = true;
 }
