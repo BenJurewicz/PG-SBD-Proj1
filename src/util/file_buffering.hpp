@@ -19,8 +19,9 @@ class BufferedFile {
 
    private:
     static constexpr size_t recordSize = MAX_STRING_LENGTH;
+    static constexpr size_t recordSizeWithNewLine = recordSize + 1;
     static constexpr size_t recordsPerBlock = 20;
-    static constexpr size_t blockSize = recordsPerBlock * recordSize;
+    static constexpr size_t blockSize = recordsPerBlock * recordSizeWithNewLine;
 
     std::fstream file;
     std::vector<Record> block;
@@ -29,9 +30,11 @@ class BufferedFile {
 
     // Converts a record index to the corresponding block index
     size_t rIndexToBlockIndex(size_t index);
-    // Converts a record index witinh a file to a record index within the
+    // Converts a record index within a file to a record index within the
     // corresponding block
     size_t rIndexToInBlockIndex(size_t index);
+    // Converts a block index into a character offset within the file
+    size_t bIndexToOffset(size_t index);
 
     void loadBlock(size_t blockIndex);
 };

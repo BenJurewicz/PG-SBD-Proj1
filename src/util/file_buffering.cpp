@@ -22,7 +22,8 @@ void BufferedFile::loadBlock(size_t blockIndex) {
     }
     flush();
 
-    size_t offset = currentBlockIndex * blockSize;
+    // TODO: See what happens when the seekp here goes beyond eof
+    size_t offset = bIndexToOffset(currentBlockIndex);
     file.seekg(offset, std::ios::beg);
 
     block.clear();
@@ -48,12 +49,13 @@ void BufferedFile::flush() {
         return;
     }
 
-    size_t offset = currentBlockIndex * blockSize;
+    // TODO: See what happens when the seekp here goes beyond eof
+    size_t offset = bIndexToOffset(currentBlockIndex);
     file.seekp(offset, std::ios::beg);
 
     for (const auto& line : block) {
         file.write(line.c_str(), line.length());
-        file.put('\n');
+        file.write("\n", 1);
     }
 
     file.flush();
@@ -66,6 +68,10 @@ size_t BufferedFile::rIndexToBlockIndex(size_t index) {
 
 size_t BufferedFile::rIndexToInBlockIndex(size_t index) {
     return (index % recordsPerBlock);
+}
+
+size_t BufferedFile::bIndexToOffset(size_t blockIndex) {
+    return blockIndex * blockSize;
 }
 
 Record BufferedFile::read(size_t index) {
