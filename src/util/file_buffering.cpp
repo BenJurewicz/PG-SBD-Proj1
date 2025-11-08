@@ -21,6 +21,9 @@ void BufferedFile::loadBlock(size_t blockIndex) {
     }
     flush();
 
+    size_t offset = currentBlockIndex * blockSize;
+    file.seekg(offset, std::ios::beg);
+
     block.clear();
     size_t i = 0;
     std::string str;
@@ -28,6 +31,7 @@ void BufferedFile::loadBlock(size_t blockIndex) {
         block.push_back(str);
         i++;
     }
+    file.clear();  // Clear flags in case we stumbled upon eof
 
     // Fill the block in case we run into the end of the file
     while (i < recordsPerBlock) {
