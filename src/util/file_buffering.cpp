@@ -23,20 +23,29 @@ void BufferedFile::loadBlock(size_t blockIndex) {
     flush();
 
     // TODO: See what happens when the seekp here goes beyond eof
-    size_t offset = bIndexToOffset(currentBlockIndex);
+    size_t offset = bIndexToOffset(blockIndex);
     file.seekg(offset, std::ios::beg);
 
     block.clear();
     size_t i = 0;
-    std::string str;
-    while (i < recordsPerBlock && std::getline(file, str)) {
+    std::string str(recordSize, '\0');  // NOTE: String specific
+
+    // WARN: I think if the last record in the file is not 30 chars it will
+    // not get loaded correctly to block vector (Test later)
+    while (i < recordsPerBlock && file.read(str.data(), recordSize)) {
         block.push_back(str);
         i++;
     }
+
+    // while (i < recordsPerBlock && std::getline(file, str)) {
+    //     block.push_back(str);
+    //     i++;
+    // }
     file.clear();  // Clear flags in case we stumbled upon eof
 
     // Fill the block in case we run into the end of the file
     while (i < recordsPerBlock) {
+        // NOTE: change to block.emplace_back(30, '\0')
         block.push_back("");
         i++;
     }
@@ -54,8 +63,8 @@ void BufferedFile::flush() {
     file.seekp(offset, std::ios::beg);
 
     for (const auto& line : block) {
-        file.write(line.c_str(), line.length());
-        file.write("\n", 1);
+        file.write(line.data(), line.length());
+        // file.write("\n", 1);
     }
 
     file.flush();
@@ -86,7 +95,7 @@ void BufferedFile::write(size_t index, Record data) {
     size_t inBlockIndex = rIndexToInBlockIndex(index);
     loadBlock(blockIndex);
 
-    data.resize(recordSize);
+    data.resize(recordSize);  // NOTE: String specific
 
     block.at(inBlockIndex) = data;
     isBlockModified = true;

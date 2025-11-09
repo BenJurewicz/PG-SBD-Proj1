@@ -19,7 +19,7 @@ class BufferedFile {
 
    private:
     static constexpr size_t recordSize = MAX_STRING_LENGTH;
-    static constexpr size_t recordSizeWithNewLine = recordSize + 1;
+    static constexpr size_t recordSizeWithNewLine = recordSize + 0;
     static constexpr size_t recordsPerBlock = 20;
     static constexpr size_t blockSize = recordsPerBlock * recordSizeWithNewLine;
 
