@@ -1,0 +1,8 @@
+#!/bin/zsh
+
+if ! ([[ -n $1 ]] && [[ -f $1 ]]); then
+    echo "Error: Either no filename provided or the file does not exist"
+    exit 1;
+fi
+
+echo $1 | entr -scc "printFile $1"
