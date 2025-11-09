@@ -1,0 +1,1 @@
+make clean && make && ./out/sort_files && ls temp && bat -A temp/testFile.txt
