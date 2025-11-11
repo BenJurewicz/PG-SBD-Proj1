@@ -4,6 +4,12 @@ String with max length equal to 30
 
 ## TODO
 
+Todo for today:
+
+
+- [ ] Fix the seekp/seekg trying to move behind EOF
+- [ ] Look at the warn in file_buffering.cpp and test it
+
 - [x] Program for creating Data
   - [x] Manual data creation
   - [x] Automatic data creation
