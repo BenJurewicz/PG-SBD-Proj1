@@ -5,7 +5,7 @@
 int main() {
     BufferedFile f("temp/testFile.txt");
 
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < 20; i++) {
         f.write(i, std::to_string(i));
     }
 

@@ -4,6 +4,8 @@
 #include <cstddef>
 #include <defines.hpp>
 #include <fstream>
+#include <ios>
+#include <iosfwd>
 #include <vector>
 
 class BufferedFile {
@@ -19,9 +21,8 @@ class BufferedFile {
 
    private:
     static constexpr size_t recordSize = MAX_STRING_LENGTH;
-    static constexpr size_t recordSizeWithNewLine = recordSize + 0;
     static constexpr size_t recordsPerBlock = 20;
-    static constexpr size_t blockSize = recordsPerBlock * recordSizeWithNewLine;
+    static constexpr size_t blockSize = recordsPerBlock * recordSize;
 
     std::fstream file;
     std::vector<Record> block;
@@ -37,6 +38,18 @@ class BufferedFile {
     size_t bIndexToOffset(size_t index);
 
     void loadBlock(size_t blockIndex);
+    std::streampos getFileSize();
+    // Extends a file to the total desired size given in bytes
+    void extendFile(std::streampos size);
+
+    // Sets the put cursor in the desired place, in addition validates the given
+    // offset and extends the file if needed
+    void seekpWithExtend(std::ifstream::off_type offset,
+                         std::ios_base::seekdir dir);
+    // Sets the get cursor in the desired place, in addition validates the given
+    // offset and extends the file if needed
+    void seekgWithExtend(std::ifstream::off_type offset,
+                         std::ios_base::seekdir dir);
 };
 
 #endif

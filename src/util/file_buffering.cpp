@@ -1,6 +1,7 @@
 #include <cstddef>
 #include <file_buffering.hpp>
 #include <fstream>
+#include <iosfwd>
 #include <string>
 
 BufferedFile::BufferedFile(const char* fileName)
@@ -22,31 +23,26 @@ void BufferedFile::loadBlock(size_t blockIndex) {
     }
     flush();
 
-    // TODO: See what happens when the seekp here goes beyond eof
     size_t offset = bIndexToOffset(blockIndex);
-    file.seekg(offset, std::ios::beg);
+    seekgWithExtend(offset, std::ios::beg);
 
     block.clear();
     size_t i = 0;
-    std::string str(recordSize, '\0');  // NOTE: String specific
+    std::string emptyStr(recordSize, '\0');    // NOTE: String specific
+    std::string currentStr(recordSize, '\0');  // NOTE: String specific
 
-    // WARN: I think if the last record in the file is not 30 chars it will
-    // not get loaded correctly to block vector (Test later)
-    while (i < recordsPerBlock && file.read(str.data(), recordSize)) {
-        block.push_back(str);
+    while (i < recordsPerBlock && file.good()) {
+        file.read(currentStr.data(), recordSize);
+        block.push_back(currentStr);
+        currentStr = emptyStr;
         i++;
     }
 
-    // while (i < recordsPerBlock && std::getline(file, str)) {
-    //     block.push_back(str);
-    //     i++;
-    // }
     file.clear();  // Clear flags in case we stumbled upon eof
 
     // Fill the block in case we run into the end of the file
     while (i < recordsPerBlock) {
-        // NOTE: change to block.emplace_back(30, '\0')
-        block.push_back("");
+        block.emplace_back(30, '\0');
         i++;
     }
 
@@ -58,9 +54,8 @@ void BufferedFile::flush() {
         return;
     }
 
-    // TODO: See what happens when the seekp here goes beyond eof
-    size_t offset = bIndexToOffset(currentBlockIndex);
-    file.seekp(offset, std::ios::beg);
+    std::fstream::off_type offset = bIndexToOffset(currentBlockIndex);
+    seekpWithExtend(offset, std::ios::beg);
 
     for (const auto& line : block) {
         file.write(line.data(), line.length());
@@ -99,4 +94,34 @@ void BufferedFile::write(size_t index, Record data) {
 
     block.at(inBlockIndex) = data;
     isBlockModified = true;
+}
+
+std::streampos BufferedFile::getFileSize() {
+    file.seekg(0, std::ios::end);
+    return file.tellg();
+}
+
+void BufferedFile::extendFile(std::streampos size) {
+    auto curentSize = getFileSize();
+    if (curentSize >= size) {
+        return;
+    }
+    file.seekp(0, std::ios::end);
+    auto diffSize = size - curentSize;
+    std::string str('\0', recordSize);  // NOTE: String specific
+    for (auto i = 0; i < diffSize; i += recordSize) {
+        file.write(str.data(), str.length());
+    }
+}
+
+void BufferedFile::seekpWithExtend(std::ifstream::off_type offset,
+                                   std::ios_base::seekdir dir) {
+    extendFile(offset + blockSize);
+    file.seekp(offset, dir);
+}
+
+void BufferedFile::seekgWithExtend(std::ifstream::off_type offset,
+                                   std::ios_base::seekdir dir) {
+    extendFile(offset + blockSize);
+    file.seekg(offset, dir);
 }
