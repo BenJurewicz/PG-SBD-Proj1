@@ -1,1 +1,1 @@
-make clean && make && ./out/sort_files && ls temp && printFile temp/testFile.txt
+make clean && make debug && ./out/sort_files && ls temp && printFile temp/testFile.txt
