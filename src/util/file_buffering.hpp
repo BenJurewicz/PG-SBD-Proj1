@@ -46,10 +46,6 @@ class BufferedFile {
     // offset and extends the file if needed
     void seekpWithExtend(std::ifstream::off_type offset,
                          std::ios_base::seekdir dir);
-    // Sets the get cursor in the desired place, in addition validates the given
-    // offset and extends the file if needed
-    void seekgWithExtend(std::ifstream::off_type offset,
-                         std::ios_base::seekdir dir);
 };
 
 #endif

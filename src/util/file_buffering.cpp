@@ -1,6 +1,7 @@
 #include <cstddef>
 #include <file_buffering.hpp>
 #include <fstream>
+#include <ios>
 #include <iosfwd>
 #include <string>
 
@@ -24,7 +25,7 @@ void BufferedFile::loadBlock(size_t blockIndex) {
     flush();
 
     size_t offset = bIndexToOffset(blockIndex);
-    seekgWithExtend(offset, std::ios::beg);
+    file.seekg(offset, std::ios::beg);
 
     block.clear();
     size_t i = 0;
@@ -118,10 +119,4 @@ void BufferedFile::seekpWithExtend(std::ifstream::off_type offset,
                                    std::ios_base::seekdir dir) {
     extendFile(offset + blockSize);
     file.seekp(offset, dir);
-}
-
-void BufferedFile::seekgWithExtend(std::ifstream::off_type offset,
-                                   std::ios_base::seekdir dir) {
-    extendFile(offset + blockSize);
-    file.seekg(offset, dir);
 }
