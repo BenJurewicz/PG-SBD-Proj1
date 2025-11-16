@@ -8,7 +8,7 @@
 std::default_random_engine rng{std::random_device{}()};
 
 std::string generate_random_string(int maxLength) {
-    std::uniform_int_distribution<int> len_dist(0, maxLength);
+    std::uniform_int_distribution<int> len_dist(1, maxLength);
     // ASCII printable characters are in rage [32,126]
     // but whe start from 33 as (char)32 is space.
     // Note: (char)33 == '!'; (char)126 == '~';
@@ -59,6 +59,13 @@ void auto_mode(std::vector<std::string>& lines) {
     std::cout << num_strings << " random strings generated." << std::endl;
 }
 
+void write_line(std::ofstream& file, const std::string& data) {
+    auto tempStr = data;
+    tempStr.resize(MAX_STRING_LENGTH);
+    std::string nulls('\0', MAX_STRING_LENGTH - data.length());
+    file << tempStr << nulls;
+}
+
 void save_file(std::vector<std::string>& lines) {
     std::string filename;
     std::cout
@@ -72,7 +79,7 @@ void save_file(std::vector<std::string>& lines) {
     std::ofstream outfile(filename);
     if (outfile.is_open()) {
         for (const auto& line : lines) {
-            outfile << line << std::endl;
+            write_line(outfile, line);
         }
         outfile.close();
         std::cout << "Data saved to " << filename << std::endl;
