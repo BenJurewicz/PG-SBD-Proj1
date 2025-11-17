@@ -42,6 +42,7 @@ void BufferedFile::loadBlock(size_t blockIndex) {
     file.clear();  // Clear flags in case we stumbled upon eof
 
     // Fill the block in case we run into the end of the file
+    // TODO: Change to std::vector::assign
     while (i < recordsPerBlock) {
         block.emplace_back(30, '\0');
         i++;
