@@ -21,23 +21,23 @@ class BufferedFile {
 
    private:
     static constexpr size_t recordSize = MAX_STRING_LENGTH;
-    static constexpr size_t recordsPerBlock = 20;
-    static constexpr size_t blockSize = recordsPerBlock * recordSize;
+    static constexpr size_t recordsPerPage = 20;
+    static constexpr size_t pageSize = recordsPerPage * recordSize;
 
     std::fstream file;
-    std::vector<Record> block;
-    size_t currentBlockIndex = -1;
-    bool isBlockModified = false;
+    std::vector<Record> page;
+    size_t currentPageIndex = -1;
+    bool isPageModified = false;
 
-    // Converts a record index to the corresponding block index
-    size_t rIndexToBlockIndex(size_t index);
+    // Converts a record index to the corresponding page index
+    size_t rIndexToPageIndex(size_t index);
     // Converts a record index within a file to a record index within the
-    // corresponding block
-    size_t rIndexToInBlockIndex(size_t index);
-    // Converts a block index into a character offset within the file
+    // corresponding page
+    size_t rIndexToInPageIndex(size_t index);
+    // Converts a page index into a character offset within the file
     size_t bIndexToOffset(size_t index);
 
-    void loadBlock(size_t blockIndex);
+    void loadPage(size_t pageIndex);
     std::streampos getFileSize();
     // Extends a file to the total desired size given in bytes
     void extendFile(std::streampos size);
