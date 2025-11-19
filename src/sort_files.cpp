@@ -8,8 +8,8 @@
 #include <vector>
 
 // TODO: make this into options later
-constexpr unsigned int bufferCount = 5;
-// TODO add recordsPerPage here
+constexpr size_t bufferCount = 5;
+constexpr size_t recordsPerPage = 20;  // Blocking factor
 
 int main() {
     BufferedFile f("temp/testFile.txt");
