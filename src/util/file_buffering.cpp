@@ -29,8 +29,8 @@ void BufferedFile::loadPage(size_t pageIndex) {
 
     page.clear();
     size_t i = 0;
-    std::string emptyStr(recordSize, '\0');    // NOTE: String specific
-    std::string currentStr(recordSize, '\0');  // NOTE: String specific
+    std::string emptyStr;
+    std::string currentStr;
 
     while (i < recordsPerPage && file.good()) {
         file.read(currentStr.data(), recordSize);
@@ -60,7 +60,7 @@ void BufferedFile::flush() {
     seekpWithExtend(offset, std::ios::beg);
 
     for (const auto& line : page) {
-        file.write(line.data(), line.length());
+        file.write(line.data().data(), line.lenght());
         // file.write("\n", 1);
     }
 
@@ -92,10 +92,20 @@ void BufferedFile::write(size_t index, Record data) {
     size_t inPageIndex = rIndexToInPageIndex(index);
     loadPage(pageIndex);
 
-    data.resize(recordSize);  // NOTE: String specific
+    data.resize(recordSize);
 
     page.at(inPageIndex) = data;
     isPageModified = true;
+}
+
+std::optional<BufferedFile::BufferType> BufferedFile::getNextPage() {
+    loadPage(currentPageIndex + 1);
+    // return page.con
+    // TODO:
+    return {};
+}
+void BufferedFile::resetPageIndex() {
+    // TODO:
 }
 
 std::streampos BufferedFile::getFileSize() {
@@ -110,7 +120,7 @@ void BufferedFile::extendFile(std::streampos size) {
     }
     file.seekp(0, std::ios::end);
     auto diffSize = size - curentSize;
-    std::string str('\0', recordSize);  // NOTE: String specific
+    std::string str;
     for (auto i = 0; i < diffSize; i += recordSize) {
         file.write(str.data(), str.length());
     }

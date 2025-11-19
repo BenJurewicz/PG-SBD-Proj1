@@ -6,18 +6,22 @@
 #include <fstream>
 #include <ios>
 #include <iosfwd>
+#include <optional>
+#include <record.hpp>
 #include <vector>
 
 class BufferedFile {
+   public:
     using BufferType = std::vector<Record>;
 
-   public:
     BufferedFile(const char* s);
     ~BufferedFile();
 
     Record read(size_t index);
     void write(size_t index, Record data);
     void flush();
+    std::optional<BufferType> getNextPage();
+    void resetPageIndex();
 
    private:
     static constexpr size_t recordSize = MAX_STRING_LENGTH;
