@@ -1,7 +1,7 @@
-#include <defines.hpp>
 #include <fstream>
 #include <iostream>
 #include <random>
+#include <record.hpp>
 #include <string>
 #include <vector>
 
@@ -37,7 +37,7 @@ void manual_mode(std::vector<std::string>& lines) {
             break;
         }
 
-        if (line.length() > MAX_STRING_LENGTH) {
+        if (line.length() > Record::maxLen) {
             std::cout
                 << "Error: String exceeds 30 characters. Please try again."
                 << std::endl;
@@ -55,15 +55,15 @@ void auto_mode(std::vector<std::string>& lines) {
     std::cin.ignore();
 
     for (int i = 0; i < num_strings; ++i) {
-        lines.push_back(generate_random_string(MAX_STRING_LENGTH));
+        lines.push_back(generate_random_string(Record::maxLen));
     }
     std::cout << num_strings << " random strings generated." << std::endl;
 }
 
 void write_line(std::ofstream& file, const std::string& data) {
     auto tempStr = data;
-    tempStr.resize(MAX_STRING_LENGTH);
-    std::string nulls('\0', MAX_STRING_LENGTH - data.length());
+    tempStr.resize(Record::maxLen);
+    std::string nulls('\0', Record::maxLen - data.length());
     file << tempStr << nulls;
 }
 

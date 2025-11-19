@@ -3,12 +3,12 @@
 
 #include <concepts>
 #include <cstddef>
-#include <defines.hpp>
 #include <fstream>
 #include <ios>
 #include <iosfwd>
 #include <optional>
 #include <record.hpp>
+#include <utility>
 #include <vector>
 
 template <typename R>
@@ -31,16 +31,26 @@ class BufferedFile {
     std::optional<BufferType> readPage();
     // Completly overwrites the current page
     void writePage(RangeOfRecords auto const& page) {
-        // TODO: Make sure that the lenght of page is exaclty recordsPerPage
-        this->page = page;
+        BufferType tmp;
+        tmp.reserve(30);
+
+        for (auto const& r : page) {
+            if (tmp.size() >= recordsPerPage) {
+                break;
+            }
+            tmp.push_back(r);
+        }
+
+        this->page = std::move(tmp);
         isPageModified = true;
+        loadPage(currentPageIndex + 1);
     }
+
     // Resets the page index back to the first page
     void resetPageIndex();
-    void advancePageIndex();
 
    private:
-    static constexpr size_t recordSize = MAX_STRING_LENGTH;
+    static constexpr size_t recordSize = Record::maxLen;
     static constexpr size_t recordsPerPage = 20;
     static constexpr size_t pageSize = recordsPerPage * recordSize;
 

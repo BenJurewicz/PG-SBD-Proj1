@@ -1,10 +1,9 @@
-#include <defines.hpp>
 #include <ostream>
 #include <record.hpp>
 
 Record const Record::empty = Record();
 
-Record::Record() : _data(MAX_STRING_LENGTH, '\0') {}
+Record::Record() : _data(Record::maxLen, '\0') {}
 Record::Record(const std::string& str) : _data(str) {}
 Record::Record(size_t count, char c) : _data(count, c) {}
 Record::Record(const char* cStr) : _data(cStr) {}

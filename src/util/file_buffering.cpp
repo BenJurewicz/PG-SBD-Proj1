@@ -44,9 +44,8 @@ void BufferedFile::loadPage(size_t pageIndex) {
     file.clear();  // Clear flags in case we stumbled upon eof
 
     // Fill the page in case we run into the end of the file
-    // TODO: Change to std::vector::assign
     while (i < recordsPerPage) {
-        page.emplace_back(30, '\0');
+        page.push_back(Record::empty);
         i++;
     }
 
@@ -107,13 +106,12 @@ void BufferedFile::write(size_t index, Record data) {
 }
 
 std::optional<BufferedFile::BufferType> BufferedFile::readPage() {
-    loadPage(currentPageIndex);
-    return isEmpty() ? std::nullopt : std::optional(page);
+    auto retVal = isEmpty() ? std::nullopt : std::optional(page);
+    loadPage(currentPageIndex + 1);
+    return retVal;
 }
 
 void BufferedFile::resetPageIndex() { loadPage(0); }
-
-void BufferedFile::advancePageIndex() { loadPage(currentPageIndex + 1); }
 
 std::streampos BufferedFile::getFileSize() {
     file.seekg(0, std::ios::end);

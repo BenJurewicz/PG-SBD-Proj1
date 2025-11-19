@@ -4,6 +4,7 @@
 
 class Record {
    public:
+    static constexpr size_t maxLen = 30;
     static const Record empty;
 
     Record();

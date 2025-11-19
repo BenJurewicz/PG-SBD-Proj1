@@ -4,7 +4,6 @@
 #include <iostream>
 #include <ostream>
 #include <queue>
-#include <ranges>
 #include <string>
 #include <vector>
 
@@ -18,43 +17,18 @@ int main() {
     for (int i = 0; i < 100; i++) {
         f.write(99 - i, std::to_string(i));
     }
-    //
-    // f.write(13, "123456789012345678901234567890");
-    // f.write(33, "123456789012345678901234567890");
-    //
-    // size_t pageCount = 0;
-    // f.resetPageIndex();
-    // auto page = f.readPage();
-    // for (int i = 0; i < 5; i++) {
-    //     f.advancePageIndex();
-    //     f.writePage(page.value());
-    // }
-    // f.resetPageIndex();
-    // page = f.readPage();
-    // f.advancePageIndex();
-    //
-    // while (page.has_value()) {
-    //     std::cout << "\nPage: " << pageCount++ << '\n';
-    //     for (auto& s : page.value()) {
-    //         std::cout << s << '\n';
-    //     }
-    //     std::cout << std::endl;
-    //     page = f.readPage();
-    //     f.advancePageIndex();
-    // }
 
     std::vector<std::vector<Record>> buffers(bufferCount);
 
     f.resetPageIndex();
-    std::optional<BufferedFile::BufferType> page;
+    std::optional<BufferedFile::BufferType> page = f.readPage();
 
     for (auto& b : buffers) {
-        page = f.readPage();
         if (!page.has_value()) {
             break;
         }
-        f.advancePageIndex();
         b = page.value();
+        page = f.readPage();
     }
 
     // Sort:
@@ -96,5 +70,7 @@ int main() {
     // NOTE: Change BufferedFile so that reads returns a std::optional
     // so it can fail if you leave the file and write will write anywhere in
     // the already written or directly after it
+
+    std::cout << "Finished" << std::endl;
     return 0;
 }
