@@ -20,6 +20,7 @@ class BufferedFile {
     Record read(size_t index);
     void write(size_t index, Record data);
     void flush();
+    bool isEmpty();
     std::optional<BufferType> getNextPage();
     void resetPageIndex();
 
@@ -48,8 +49,9 @@ class BufferedFile {
 
     // Sets the put cursor in the desired place, in addition validates the given
     // offset and extends the file if needed
-    void seekpWithExtend(std::ifstream::off_type offset,
-                         std::ios_base::seekdir dir);
+    void seekpWithExtend(
+        std::ifstream::off_type offset, std::ios_base::seekdir dir
+    );
 };
 
 #endif

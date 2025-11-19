@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <file_buffering.hpp>
 #include <iostream>
 #include <string>
@@ -16,7 +17,17 @@ int main() {
     f.write(13, "123456789012345678901234567890");
     f.write(33, "123456789012345678901234567890");
 
-    std::cout << "Hello from sort_files!" << std::endl;
+    size_t pageCount = 0;
+    f.resetPageIndex();
+    auto page = f.getNextPage();
+    while (page.has_value()) {
+        std::cout << "\nPage: " << pageCount << '[';
+        for (auto& s : page.value()) {
+            std::cout << s << std::endl;
+        }
+        std::cout << "]\n";
+        page = f.getNextPage();
+    }
 
     std::vector<std::vector<Record>> buffers(bufferCount);
     // TODO: Fill each buffer with a single page from the BufferedFile

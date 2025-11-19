@@ -1,8 +1,10 @@
+#include <algorithm>
 #include <cstddef>
 #include <file_buffering.hpp>
 #include <fstream>
 #include <ios>
 #include <iosfwd>
+#include <optional>
 #include <string>
 
 BufferedFile::BufferedFile(const char* fileName)
@@ -29,12 +31,12 @@ void BufferedFile::loadPage(size_t pageIndex) {
 
     page.clear();
     size_t i = 0;
-    std::string emptyStr;
-    std::string currentStr;
+    std::string emptyStr(recordSize, '\0');
+    std::string currentStr = emptyStr;
 
     while (i < recordsPerPage && file.good()) {
         file.read(currentStr.data(), recordSize);
-        page.push_back(currentStr);
+        page.emplace_back(currentStr);
         currentStr = emptyStr;
         i++;
     }
@@ -66,6 +68,12 @@ void BufferedFile::flush() {
 
     file.flush();
     isPageModified = false;
+}
+
+bool BufferedFile::isEmpty() {
+    return std::ranges::all_of(page, [](auto& s) {
+        return s == Record::empty;
+    });
 }
 
 size_t BufferedFile::rIndexToPageIndex(size_t index) {
@@ -100,12 +108,12 @@ void BufferedFile::write(size_t index, Record data) {
 
 std::optional<BufferedFile::BufferType> BufferedFile::getNextPage() {
     loadPage(currentPageIndex + 1);
-    // return page.con
-    // TODO:
-    return {};
+    return isEmpty() ? std::nullopt : std::optional(page);
 }
+
 void BufferedFile::resetPageIndex() {
-    // TODO:
+    loadPage(0);
+    currentPageIndex = 0;
 }
 
 std::streampos BufferedFile::getFileSize() {
@@ -126,8 +134,9 @@ void BufferedFile::extendFile(std::streampos size) {
     }
 }
 
-void BufferedFile::seekpWithExtend(std::ifstream::off_type offset,
-                                   std::ios_base::seekdir dir) {
+void BufferedFile::seekpWithExtend(
+    std::ifstream::off_type offset, std::ios_base::seekdir dir
+) {
     extendFile(offset + pageSize);
     file.seekp(offset, dir);
 }
