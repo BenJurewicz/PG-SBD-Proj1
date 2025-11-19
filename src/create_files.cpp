@@ -11,7 +11,8 @@ std::string generate_random_string(int maxLength) {
     std::uniform_int_distribution<int> len_dist(1, maxLength);
     // ASCII printable characters are in rage [32,126]
     // but whe start from 33 as (char)32 is space.
-    // Note: (char)33 == '!'; (char)126 == '~';
+    // NOTE: (char)33 == '!'; (char)126 == '~';
+    // TODO: Ocasinally got non ascii chars here
     std::uniform_int_distribution<int> char_dist(33, 126);
 
     int length = len_dist(rng);

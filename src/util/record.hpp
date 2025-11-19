@@ -4,6 +4,8 @@
 
 class Record {
    public:
+    static const Record empty;
+
     Record();
     Record(const std::string& str);
     Record(size_t count, char c);
@@ -14,6 +16,8 @@ class Record {
     void resize(size_t size);
 
     bool operator<=>(const Record& other) const = default;
+
+    friend std::ostream& operator<<(std::ostream& os, const Record& r);
 
    private:
     std::string _data;
