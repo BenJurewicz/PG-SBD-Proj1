@@ -15,7 +15,8 @@ class Record {
     size_t lenght() const;
     void resize(size_t size);
 
-    bool operator<=>(const Record& other) const = default;
+    auto operator<=>(const Record& other) const = default;
+    bool operator==(const Record& other) const = default;
 
     friend std::ostream& operator<<(std::ostream& os, const Record& r);
 

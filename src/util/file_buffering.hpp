@@ -1,6 +1,7 @@
 #ifndef FILE_BUFFERING_HPP
 #define FILE_BUFFERING_HPP
 
+#include <concepts>
 #include <cstddef>
 #include <defines.hpp>
 #include <fstream>
@@ -9,6 +10,10 @@
 #include <optional>
 #include <record.hpp>
 #include <vector>
+
+template <typename R>
+concept RangeOfRecords = std::ranges::range<R> &&
+                         std::same_as<std::ranges::range_value_t<R>, Record>;
 
 class BufferedFile {
    public:
@@ -20,9 +25,19 @@ class BufferedFile {
     Record read(size_t index);
     void write(size_t index, Record data);
     void flush();
+    // Checks if the current page is empty
     bool isEmpty();
-    std::optional<BufferType> getNextPage();
+    // Returns the current page
+    std::optional<BufferType> readPage();
+    // Completly overwrites the current page
+    void writePage(RangeOfRecords auto const& page) {
+        // TODO: Make sure that the lenght of page is exaclty recordsPerPage
+        this->page = page;
+        isPageModified = true;
+    }
+    // Resets the page index back to the first page
     void resetPageIndex();
+    void advancePageIndex();
 
    private:
     static constexpr size_t recordSize = MAX_STRING_LENGTH;

@@ -106,15 +106,14 @@ void BufferedFile::write(size_t index, Record data) {
     isPageModified = true;
 }
 
-std::optional<BufferedFile::BufferType> BufferedFile::getNextPage() {
-    loadPage(currentPageIndex + 1);
+std::optional<BufferedFile::BufferType> BufferedFile::readPage() {
+    loadPage(currentPageIndex);
     return isEmpty() ? std::nullopt : std::optional(page);
 }
 
-void BufferedFile::resetPageIndex() {
-    loadPage(0);
-    currentPageIndex = 0;
-}
+void BufferedFile::resetPageIndex() { loadPage(0); }
+
+void BufferedFile::advancePageIndex() { loadPage(currentPageIndex + 1); }
 
 std::streampos BufferedFile::getFileSize() {
     file.seekg(0, std::ios::end);
