@@ -112,6 +112,8 @@ std::optional<BufferedFile::BufferType> BufferedFile::readPage() {
 }
 
 void BufferedFile::resetPageIndex() { loadPage(0); }
+void BufferedFile::setPageIndex(size_t index) { loadPage(index); }
+size_t BufferedFile::getPageIndex() { return currentPageIndex; }
 
 std::streampos BufferedFile::getFileSize() {
     file.seekg(0, std::ios::end);
