@@ -1,1 +1,15 @@
-make clean && make debug && ./out/sort_files && ls temp && printFile temp/testFile.txt
+#!/bin/bash
+
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+ORANGE='\033[0;33m'
+WHITE='\033[0m' # No Color
+
+make clean &&
+make debug &&
+echo -e "${BLUE}Output of ./out/sort_files:${WHITE}" &&
+./out/sort_files &&
+echo -e "${ORANGE}State of the temp directory:${WHITE}" &&
+ls temp &&
+echo -e "${MAGENTA}Contents of ./temp/testFile.txt:${WHITE}" &&
+printFile temp/testFile.txt

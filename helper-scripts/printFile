@@ -8,4 +8,4 @@ fi
 # Replace every null sequence with a new line and then
 # break up every sequence of non nulls with a new line
 # perl -0777 -pe 's/\0+/\n/g; s/([^\n]{30})/$1\n/g' $1 | bat
-perl -0777 -pe 's/([^\n]{30})/$1\n/g; s/\0+//g' $1 | bat
+perl -0777 -pe 's/([^\n]{30})/$1\n/g; s/\0+//g' $1 | bat --paging=never --file-name "${1}"
