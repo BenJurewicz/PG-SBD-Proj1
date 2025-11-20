@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <file_buffering.hpp>
 #include <fstream>
@@ -62,14 +63,24 @@ void BufferedFile::flush() {
 
     for (const auto& line : page) {
         file.write(line.data().data(), line.lenght());
-        // file.write("\n", 1);
     }
 
     file.flush();
     isPageModified = false;
 }
 
-bool BufferedFile::isEmpty() {
+size_t BufferedFile::getPageCount() {
+    return std::ceil(static_cast<float>(getRecordCount()) / recordsPerPage);
+}
+
+size_t BufferedFile::getRecordCount() {
+    flush();
+    file.seekg(0, std::ios::end);
+    auto lastFileIndex = static_cast<float>(file.tellg());
+    return std::ceil(lastFileIndex / recordSize);
+}
+
+bool BufferedFile::isCurrentPageEmpty() {
     return std::ranges::all_of(page, [](auto& s) {
         return s == Record::empty;
     });
@@ -106,7 +117,7 @@ void BufferedFile::write(size_t index, Record data) {
 }
 
 std::optional<BufferedFile::BufferType> BufferedFile::readPage() {
-    auto retVal = isEmpty() ? std::nullopt : std::optional(page);
+    auto retVal = isCurrentPageEmpty() ? std::nullopt : std::optional(page);
     loadPage(currentPageIndex + 1);
     return retVal;
 }

@@ -26,7 +26,7 @@ class BufferedFile {
     void write(size_t index, Record data);
     void flush();
     // Checks if the current page is empty
-    bool isEmpty();
+    bool isCurrentPageEmpty();
     // Returns the current page and increments the page index
     std::optional<BufferType> readPage();
     // Completly overwrites the current page and increments the page index
@@ -51,9 +51,14 @@ class BufferedFile {
     void setPageIndex(size_t index);
     size_t getPageIndex();
 
+    size_t getPageCount();
+    size_t getRecordCount();
+
    private:
+    // Record Size in bytes
     static constexpr size_t recordSize = Record::maxLen;
     static constexpr size_t recordsPerPage = 10;
+    // Page size in bytes
     static constexpr size_t pageSize = recordsPerPage * recordSize;
 
     std::fstream file;

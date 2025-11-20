@@ -11,6 +11,10 @@
 constexpr size_t bufferCount = 5;
 // constexpr size_t recordsPerPage = 20;  // Blocking factor
 
+void createRunsInFile(
+    BufferedFile& f, std::vector<std::vector<Record>>& buffers
+);
+
 int main() {
     BufferedFile f("temp/testFile.txt");
 
@@ -21,12 +25,36 @@ int main() {
 
     std::vector<std::vector<Record>> buffers(bufferCount);
 
+    createRunsInFile(f, buffers);
+
+    std::cout << "Stage 2: Merging runs" << std::endl;
+
+    BufferedFile t("temp/tempFile");
+    BufferedFile& source = f;
+    BufferedFile& dest = t;
+
+    size_t pageCount = f.getPageCount();
+    size_t runLenInPages = buffers.size();
+    size_t readPages = 0;
+
+    // NOTE: Change BufferedFile so that reads returns a std::optional
+    // so it can fail if you leave the file and write will write anywhere in
+    // the already written section or directly after it
+
+    std::cout << "Finished" << std::endl;
+    return 0;
+}
+
+void createRunsInFile(
+    BufferedFile& f, std::vector<std::vector<Record>>& buffers
+) {
+    std::cout << "Stage 1: Divide into runs" << std::endl;
+
     f.resetPageIndex();
     size_t pageIndex = f.getPageIndex();
     bool isFileEmpty = false;
     size_t recordIndex = 0;
 
-    // Divide into runs
     while (!isFileEmpty) {
         // TODO: This would be better as a iterator on pages
         // This way there would be no need for f.getPageIndex()
@@ -79,11 +107,4 @@ int main() {
             }
         }
     }
-
-    // NOTE: Change BufferedFile so that reads returns a std::optional
-    // so it can fail if you leave the file and write will write anywhere in
-    // the already written section or directly after it
-
-    std::cout << "Finished" << std::endl;
-    return 0;
 }
