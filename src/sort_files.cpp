@@ -22,7 +22,7 @@ int main() {
     // BufferedFile f("temp/testFile.txt");
     auto f = std::make_shared<BufferedFile>("temp/testFile.txt");
 
-    Buffer bf(f, 1, 1);
+    // Buffer bf(f, 1, 1);
 
     size_t maxi = 100;
     for (size_t i = 0; i < maxi; i++) {
