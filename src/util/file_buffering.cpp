@@ -66,6 +66,60 @@ void BufferedFile::flush() {
     isPageModified = false;
 }
 
+bool BufferedFile::isCurrentPageEmpty() {
+    return std::ranges::all_of(page, [](auto& s) {
+        return s == Record::empty;
+    });
+}
+
+std::optional<BufferedFile::BufferType> BufferedFile::readPage(
+    size_t pageIndex
+) {
+    if (pageIndex >= getPageCount()) {
+        throw std::out_of_range("Page index is out of bounds.");
+    }
+    loadPage(pageIndex);
+    return isCurrentPageEmpty() ? std::nullopt : std::optional(page);
+}
+
+std::optional<BufferedFile::BufferType> BufferedFile::readPage() {
+    return readPage(currentPageIndex);
+}
+
+void BufferedFile::resetPageIndex() { loadPage(0); }
+void BufferedFile::setPageIndex(size_t index) { loadPage(index); }
+size_t BufferedFile::getPageIndex() { return currentPageIndex; }
+
+size_t BufferedFile::getPageCount() {
+    return std::ceil(static_cast<float>(getRecordCount()) / recordsPerPage);
+}
+
+size_t BufferedFile::getRecordCount() {
+    flush();
+    file.seekg(0, std::ios::end);
+    auto lastFileIndex = static_cast<float>(file.tellg());
+    return std::ceil(lastFileIndex / recordSize);
+}
+
+BufferedFile::PageIterator BufferedFile::begin() {
+    return PageIterator(this, 0);
+};
+BufferedFile::PageIterator BufferedFile::end() {
+    return PageIterator(this, getPageCount());
+};
+
+size_t BufferedFile::rIndexToPageIndex(size_t index) {
+    return index / recordsPerPage;
+}
+
+size_t BufferedFile::rIndexToInPageIndex(size_t index) {
+    return (index % recordsPerPage);
+}
+
+size_t BufferedFile::pIndexToOffset(size_t pageIndex) {
+    return pageIndex * pageSize;
+}
+
 void BufferedFile::loadPage(size_t pageIndex) {
     if (pageIndex == currentPageIndex) {
         return;
@@ -98,60 +152,6 @@ void BufferedFile::loadPage(size_t pageIndex) {
 
     currentPageIndex = pageIndex;
 }
-
-size_t BufferedFile::getPageCount() {
-    return std::ceil(static_cast<float>(getRecordCount()) / recordsPerPage);
-}
-
-size_t BufferedFile::getRecordCount() {
-    flush();
-    file.seekg(0, std::ios::end);
-    auto lastFileIndex = static_cast<float>(file.tellg());
-    return std::ceil(lastFileIndex / recordSize);
-}
-
-BufferedFile::PageIterator BufferedFile::begin() {
-    return PageIterator(this, 0);
-};
-BufferedFile::PageIterator BufferedFile::end() {
-    return PageIterator(this, getPageCount());
-};
-
-bool BufferedFile::isCurrentPageEmpty() {
-    return std::ranges::all_of(page, [](auto& s) {
-        return s == Record::empty;
-    });
-}
-
-size_t BufferedFile::rIndexToPageIndex(size_t index) {
-    return index / recordsPerPage;
-}
-
-size_t BufferedFile::rIndexToInPageIndex(size_t index) {
-    return (index % recordsPerPage);
-}
-
-size_t BufferedFile::pIndexToOffset(size_t pageIndex) {
-    return pageIndex * pageSize;
-}
-
-std::optional<BufferedFile::BufferType> BufferedFile::readPage(
-    size_t pageIndex
-) {
-    if (pageIndex >= getPageCount()) {
-        throw std::out_of_range("Page index is out of bounds.");
-    }
-    loadPage(pageIndex);
-    return isCurrentPageEmpty() ? std::nullopt : std::optional(page);
-}
-
-std::optional<BufferedFile::BufferType> BufferedFile::readPage() {
-    readPage(currentPageIndex);
-}
-
-void BufferedFile::resetPageIndex() { loadPage(0); }
-void BufferedFile::setPageIndex(size_t index) { loadPage(index); }
-size_t BufferedFile::getPageIndex() { return currentPageIndex; }
 
 std::streampos BufferedFile::getFileSize() {
     file.seekg(0, std::ios::end);
