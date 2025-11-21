@@ -110,6 +110,11 @@ Record BufferedFile::read(size_t index) {
 
 void BufferedFile::write(size_t index, Record data) {
     size_t pageIndex = rIndexToPageIndex(index);
+
+    if (pageIndex > getPageCount()) {
+        throw std::out_of_range("Cannot write: record index is beyond current file content and not an append operation.");
+    }
+
     size_t inPageIndex = rIndexToInPageIndex(index);
     loadPage(pageIndex);
 

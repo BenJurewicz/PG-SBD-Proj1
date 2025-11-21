@@ -184,6 +184,10 @@ class BufferedFile {
     void writePageAtIndex(
         size_t pageIndex, RangeOfRecords auto const& newPage
     ) {
+        if (pageIndex > getPageCount()) {
+            throw std::out_of_range("Cannot write: page index is beyond current file content and not an append operation.");
+        }
+
         loadPage(pageIndex);
 
         BufferType tmp;
