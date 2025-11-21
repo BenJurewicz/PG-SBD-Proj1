@@ -19,14 +19,11 @@ concept RangeOfRecords = std::ranges::range<R> &&
 
 class BufferedFile {
    public:
+    class PageIterator;
+
     class PageProxy {
        public:
-        PageProxy(BufferedFile* file, size_t pageIndex)
-            : file(file), pageIndex(pageIndex) {}
-
-        void setPageIndex(size_t newPageIndex) const {
-            pageIndex = newPageIndex;
-        }
+        friend class PageIterator;
 
         operator std::vector<Record>() const { return records(); }
 
@@ -46,14 +43,19 @@ class BufferedFile {
         }
 
         void operator=(RangeOfRecords auto const& newPage) {
-            file->writePageAtIndex(pageIndex, newPage);
+            file->writePage(pageIndex, newPage);
         }
 
         auto operator<=>(const PageProxy& other) const = default;
 
        private:
+        PageProxy(BufferedFile* file, size_t pageIndex)
+            : file(file), pageIndex(pageIndex) {}
+
+        void setPageIndex(size_t newPageIndex) { pageIndex = newPageIndex; }
+
         BufferedFile* file;
-        mutable size_t pageIndex;
+        size_t pageIndex;
     };
 
     class PageIterator {
@@ -65,14 +67,14 @@ class BufferedFile {
         using reference = PageProxy;
 
         PageIterator(BufferedFile* file, size_t pageIndex)
-            : file(file), pageIndex(pageIndex), proxy(file, pageIndex) {}
+            : pageIndex(pageIndex), proxy(file, pageIndex) {}
 
-        reference operator*() const {
+        reference operator*() {
             proxy.setPageIndex(pageIndex);
             return proxy;
         }
 
-        pointer operator->() const {
+        pointer operator->() {
             proxy.setPageIndex(pageIndex);
             return &proxy;
         }
@@ -140,11 +142,9 @@ class BufferedFile {
             return pageIndex <=> other.pageIndex;
         }
 
-
        private:
-        BufferedFile* file;
         size_t pageIndex;
-        mutable PageProxy proxy;
+        PageProxy proxy;
     };
 
     PageIterator begin() { return PageIterator(this, 0); };
@@ -168,31 +168,15 @@ class BufferedFile {
     // TODO: This should call writePageAtIndex also change name of
     // writePageAtIndex
     void writePage(RangeOfRecords auto const& page) {
-        BufferType tmp;
-        tmp.reserve(recordsPerPage);
-
-        for (auto r : page) {
-            if (tmp.size() >= recordsPerPage) {
-                break;
-            }
-            r.resize(recordSize);
-            tmp.push_back(r);
-        }
-
-        while (tmp.size() < recordsPerPage) {
-            tmp.push_back(Record::empty);
-        }
-
-        this->page = std::move(tmp);
-        isPageModified = true;
-        loadPage(currentPageIndex + 1);
+        writePage(currentPageIndex, page);
     }
 
-    void writePageAtIndex(
-        size_t pageIndex, RangeOfRecords auto const& newPage
-    ) {
+    void writePage(size_t pageIndex, RangeOfRecords auto const& newPage) {
         if (pageIndex > getPageCount()) {
-            throw std::out_of_range("Cannot write: page index is beyond current file content and not an append operation.");
+            throw std::out_of_range(
+                "Cannot write: page index is beyond current file content and "
+                "not an append operation."
+            );
         }
 
         loadPage(pageIndex);
