@@ -18,10 +18,10 @@ concept RangeOfRecords = std::ranges::range<R> &&
                          std::same_as<std::ranges::range_value_t<R>, Record>;
 
 class BufferedFile {
-    class PageIterator;
-    class PageProxy;
-
    public:
+    class PageProxy;
+    class PageIterator;
+
     using BufferType = std::vector<Record>;
 
     BufferedFile(const char* s);
@@ -142,81 +142,31 @@ class BufferedFile::PageIterator {
     using pointer = PageProxy*;
     using reference = PageProxy;
 
-    PageIterator(BufferedFile* file, size_t pageIndex)
-        : pageIndex(pageIndex), proxy(file, pageIndex) {}
+    PageIterator(BufferedFile* file, size_t pageIndex);
 
-    reference operator*() {
-        proxy.setPageIndex(pageIndex);
-        return proxy;
-    }
+    reference operator*();
 
-    pointer operator->() {
-        proxy.setPageIndex(pageIndex);
-        return &proxy;
-    }
+    pointer operator->();
 
-    PageIterator& operator++() {
-        pageIndex++;
-        return *this;
-    }
+    PageIterator& operator++();
+    PageIterator operator++(int);
+    PageIterator& operator--();
+    PageIterator operator--(int);
 
-    PageIterator operator++(int) {
-        PageIterator tmp = *this;
-        ++(*this);
-        return tmp;
-    }
+    PageIterator& operator+=(difference_type n);
+    PageIterator& operator-=(difference_type n);
 
-    PageIterator& operator--() {
-        pageIndex--;
-        return *this;
-    }
-
-    PageIterator operator--(int) {
-        PageIterator tmp = *this;
-        --(*this);
-        return tmp;
-    }
-
-    PageIterator& operator+=(difference_type n) {
-        pageIndex += n;
-        return *this;
-    }
-
-    PageIterator& operator-=(difference_type n) {
-        pageIndex -= n;
-        return *this;
-    }
-
-    friend PageIterator operator+(PageIterator it, difference_type n) {
-        it += n;
-        return it;
-    }
-
-    friend PageIterator operator+(difference_type n, PageIterator it) {
-        it += n;
-        return it;
-    }
-
-    friend PageIterator operator-(PageIterator it, difference_type n) {
-        it -= n;
-        return it;
-    }
-
+    friend PageIterator operator+(PageIterator it, difference_type n);
+    friend PageIterator operator+(difference_type n, PageIterator it);
+    friend PageIterator operator-(PageIterator it, difference_type n);
     friend difference_type operator-(
         const PageIterator& a, const PageIterator& b
-    ) {
-        return a.pageIndex - b.pageIndex;
-    }
+    );
 
-    reference operator[](difference_type n) const { return *(*this + n); }
+    reference operator[](difference_type n) const;
 
-    bool operator==(const PageIterator& other) const {
-        return pageIndex == other.pageIndex;
-    }
-
-    auto operator<=>(const PageIterator& other) const {
-        return pageIndex <=> other.pageIndex;
-    }
+    bool operator==(const PageIterator& other) const;
+    auto operator<=>(const PageIterator& other) const = default;
 
    private:
     size_t pageIndex;

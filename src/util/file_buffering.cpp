@@ -211,3 +211,89 @@ void BufferedFile::PageProxy::setPageIndex(size_t newPageIndex) {
 // ============================================================================
 // PageIterator
 // ============================================================================
+
+BufferedFile::PageIterator::PageIterator(BufferedFile* file, size_t pageIndex)
+    : pageIndex(pageIndex), proxy(file, pageIndex) {}
+
+BufferedFile::PageIterator::reference BufferedFile::PageIterator::operator*() {
+    proxy.setPageIndex(pageIndex);
+    return proxy;
+}
+
+BufferedFile::PageIterator::pointer BufferedFile::PageIterator::operator->() {
+    proxy.setPageIndex(pageIndex);
+    return &proxy;
+}
+
+BufferedFile::PageIterator& BufferedFile::PageIterator::operator++() {
+    pageIndex++;
+    return *this;
+}
+
+BufferedFile::PageIterator BufferedFile::PageIterator::operator++(int) {
+    PageIterator tmp = *this;
+    ++(*this);
+    return tmp;
+}
+
+BufferedFile::PageIterator& BufferedFile::PageIterator::operator--() {
+    pageIndex--;
+    return *this;
+}
+
+BufferedFile::PageIterator BufferedFile::PageIterator::operator--(int) {
+    PageIterator tmp = *this;
+    --(*this);
+    return tmp;
+}
+
+BufferedFile::PageIterator& BufferedFile::PageIterator::operator+=(
+    difference_type n
+) {
+    pageIndex += n;
+    return *this;
+}
+
+BufferedFile::PageIterator& BufferedFile::PageIterator::operator-=(
+    difference_type n
+) {
+    pageIndex -= n;
+    return *this;
+}
+
+BufferedFile::PageIterator operator+(
+    BufferedFile::PageIterator it, BufferedFile::PageIterator::difference_type n
+) {
+    it += n;
+    return it;
+}
+
+BufferedFile::PageIterator operator+(
+    BufferedFile::PageIterator::difference_type n, BufferedFile::PageIterator it
+) {
+    it += n;
+    return it;
+}
+
+BufferedFile::PageIterator operator-(
+    BufferedFile::PageIterator it, BufferedFile::PageIterator::difference_type n
+) {
+    it -= n;
+    return it;
+}
+
+BufferedFile::PageIterator::difference_type operator-(
+    const BufferedFile::PageIterator& a, const BufferedFile::PageIterator& b
+) {
+    return a.pageIndex - b.pageIndex;
+}
+
+BufferedFile::PageIterator::reference BufferedFile::PageIterator::operator[](
+    difference_type n
+) const {
+    return *(*this + n);
+}
+
+bool BufferedFile::PageIterator::operator==(const PageIterator& other) const {
+    return pageIndex == other.pageIndex;
+}
