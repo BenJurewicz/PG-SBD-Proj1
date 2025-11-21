@@ -80,6 +80,13 @@ size_t BufferedFile::getRecordCount() {
     return std::ceil(lastFileIndex / recordSize);
 }
 
+BufferedFile::PageIterator BufferedFile::begin() {
+    return PageIterator(this, 0);
+};
+BufferedFile::PageIterator BufferedFile::end() {
+    return PageIterator(this, getPageCount());
+};
+
 bool BufferedFile::isCurrentPageEmpty() {
     return std::ranges::all_of(page, [](auto& s) {
         return s == Record::empty;
@@ -112,7 +119,10 @@ void BufferedFile::write(size_t index, Record data) {
     size_t pageIndex = rIndexToPageIndex(index);
 
     if (pageIndex > getPageCount()) {
-        throw std::out_of_range("Cannot write: record index is beyond current file content and not an append operation.");
+        throw std::out_of_range(
+            "Cannot write: record index is beyond current file content and not "
+            "an append operation."
+        );
     }
 
     size_t inPageIndex = rIndexToInPageIndex(index);
@@ -135,9 +145,7 @@ std::optional<BufferedFile::BufferType> BufferedFile::readPage(
 }
 
 std::optional<BufferedFile::BufferType> BufferedFile::readPage() {
-    auto retVal = isCurrentPageEmpty() ? std::nullopt : std::optional(page);
-    loadPage(currentPageIndex + 1);
-    return retVal;
+    readPage(currentPageIndex);
 }
 
 void BufferedFile::resetPageIndex() { loadPage(0); }

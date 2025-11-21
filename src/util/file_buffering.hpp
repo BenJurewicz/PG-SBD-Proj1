@@ -18,138 +18,10 @@ concept RangeOfRecords = std::ranges::range<R> &&
                          std::same_as<std::ranges::range_value_t<R>, Record>;
 
 class BufferedFile {
-   public:
     class PageIterator;
+    class PageProxy;
 
-    class PageProxy {
-       public:
-        friend class PageIterator;
-
-        operator std::vector<Record>() const { return records(); }
-
-        std::vector<Record> records() const {
-            auto pageOpt = file->readPage(pageIndex);
-            if (pageOpt) {
-                return *pageOpt;
-            }
-            return {};
-        }
-
-        Record operator[](size_t recordIndexInPage) const {
-            if (recordIndexInPage >= recordsPerPage) {
-                throw std::out_of_range("Record index out of page bounds");
-            }
-            return file->read(pageIndex * recordsPerPage + recordIndexInPage);
-        }
-
-        void operator=(RangeOfRecords auto const& newPage) {
-            file->writePage(pageIndex, newPage);
-        }
-
-        auto operator<=>(const PageProxy& other) const = default;
-
-       private:
-        PageProxy(BufferedFile* file, size_t pageIndex)
-            : file(file), pageIndex(pageIndex) {}
-
-        void setPageIndex(size_t newPageIndex) { pageIndex = newPageIndex; }
-
-        BufferedFile* file;
-        size_t pageIndex;
-    };
-
-    class PageIterator {
-       public:
-        using iterator_category = std::random_access_iterator_tag;
-        using value_type = PageProxy;
-        using difference_type = std::ptrdiff_t;
-        using pointer = PageProxy*;
-        using reference = PageProxy;
-
-        PageIterator(BufferedFile* file, size_t pageIndex)
-            : pageIndex(pageIndex), proxy(file, pageIndex) {}
-
-        reference operator*() {
-            proxy.setPageIndex(pageIndex);
-            return proxy;
-        }
-
-        pointer operator->() {
-            proxy.setPageIndex(pageIndex);
-            return &proxy;
-        }
-
-        PageIterator& operator++() {
-            pageIndex++;
-            return *this;
-        }
-
-        PageIterator operator++(int) {
-            PageIterator tmp = *this;
-            ++(*this);
-            return tmp;
-        }
-
-        PageIterator& operator--() {
-            pageIndex--;
-            return *this;
-        }
-
-        PageIterator operator--(int) {
-            PageIterator tmp = *this;
-            --(*this);
-            return tmp;
-        }
-
-        PageIterator& operator+=(difference_type n) {
-            pageIndex += n;
-            return *this;
-        }
-
-        PageIterator& operator-=(difference_type n) {
-            pageIndex -= n;
-            return *this;
-        }
-
-        friend PageIterator operator+(PageIterator it, difference_type n) {
-            it += n;
-            return it;
-        }
-
-        friend PageIterator operator+(difference_type n, PageIterator it) {
-            it += n;
-            return it;
-        }
-
-        friend PageIterator operator-(PageIterator it, difference_type n) {
-            it -= n;
-            return it;
-        }
-
-        friend difference_type operator-(
-            const PageIterator& a, const PageIterator& b
-        ) {
-            return a.pageIndex - b.pageIndex;
-        }
-
-        reference operator[](difference_type n) const { return *(*this + n); }
-
-        bool operator==(const PageIterator& other) const {
-            return pageIndex == other.pageIndex;
-        }
-
-        auto operator<=>(const PageIterator& other) const {
-            return pageIndex <=> other.pageIndex;
-        }
-
-       private:
-        size_t pageIndex;
-        PageProxy proxy;
-    };
-
-    PageIterator begin() { return PageIterator(this, 0); };
-    PageIterator end() { return PageIterator(this, getPageCount()); };
-
+   public:
     using BufferType = std::vector<Record>;
 
     BufferedFile(const char* s);
@@ -165,8 +37,6 @@ class BufferedFile {
     // Returns the current page and increments the page index
     std::optional<BufferType> readPage();
     // Completly overwrites the current page and increments the page index
-    // TODO: This should call writePageAtIndex also change name of
-    // writePageAtIndex
     void writePage(RangeOfRecords auto const& page) {
         writePage(currentPageIndex, page);
     }
@@ -174,7 +44,7 @@ class BufferedFile {
     void writePage(size_t pageIndex, RangeOfRecords auto const& newPage) {
         if (pageIndex > getPageCount()) {
             throw std::out_of_range(
-                "Cannot write: page index is beyond current file content and "
+                "Cannot write: page index is beyond current file content and"
                 "not an append operation."
             );
         }
@@ -208,6 +78,9 @@ class BufferedFile {
     size_t getPageCount();
     size_t getRecordCount();
 
+    PageIterator begin();
+    PageIterator end();
+
     // Record Size in bytes
     static constexpr size_t recordSize = Record::maxLen;
     static constexpr size_t recordsPerPage = 10;
@@ -238,6 +111,132 @@ class BufferedFile {
     void seekpWithExtend(
         std::ifstream::off_type offset, std::ios_base::seekdir dir
     );
+};
+
+class BufferedFile::PageProxy {
+   public:
+    friend class PageIterator;
+
+    operator std::vector<Record>() const { return records(); }
+
+    std::vector<Record> records() const {
+        auto pageOpt = file->readPage(pageIndex);
+        if (pageOpt) {
+            return *pageOpt;
+        }
+        return {};
+    }
+
+    Record operator[](size_t recordIndexInPage) const {
+        if (recordIndexInPage >= recordsPerPage) {
+            throw std::out_of_range("Record index out of page bounds");
+        }
+        return file->read(pageIndex * recordsPerPage + recordIndexInPage);
+    }
+
+    void operator=(RangeOfRecords auto const& newPage) {
+        file->writePage(pageIndex, newPage);
+    }
+
+    auto operator<=>(const PageProxy& other) const = default;
+
+   private:
+    PageProxy(BufferedFile* file, size_t pageIndex)
+        : file(file), pageIndex(pageIndex) {}
+
+    void setPageIndex(size_t newPageIndex) { pageIndex = newPageIndex; }
+
+    BufferedFile* file;
+    size_t pageIndex;
+};
+
+class BufferedFile::PageIterator {
+   public:
+    using iterator_category = std::random_access_iterator_tag;
+    using value_type = PageProxy;
+    using difference_type = std::ptrdiff_t;
+    using pointer = PageProxy*;
+    using reference = PageProxy;
+
+    PageIterator(BufferedFile* file, size_t pageIndex)
+        : pageIndex(pageIndex), proxy(file, pageIndex) {}
+
+    reference operator*() {
+        proxy.setPageIndex(pageIndex);
+        return proxy;
+    }
+
+    pointer operator->() {
+        proxy.setPageIndex(pageIndex);
+        return &proxy;
+    }
+
+    PageIterator& operator++() {
+        pageIndex++;
+        return *this;
+    }
+
+    PageIterator operator++(int) {
+        PageIterator tmp = *this;
+        ++(*this);
+        return tmp;
+    }
+
+    PageIterator& operator--() {
+        pageIndex--;
+        return *this;
+    }
+
+    PageIterator operator--(int) {
+        PageIterator tmp = *this;
+        --(*this);
+        return tmp;
+    }
+
+    PageIterator& operator+=(difference_type n) {
+        pageIndex += n;
+        return *this;
+    }
+
+    PageIterator& operator-=(difference_type n) {
+        pageIndex -= n;
+        return *this;
+    }
+
+    friend PageIterator operator+(PageIterator it, difference_type n) {
+        it += n;
+        return it;
+    }
+
+    friend PageIterator operator+(difference_type n, PageIterator it) {
+        it += n;
+        return it;
+    }
+
+    friend PageIterator operator-(PageIterator it, difference_type n) {
+        it -= n;
+        return it;
+    }
+
+    friend difference_type operator-(
+        const PageIterator& a, const PageIterator& b
+    ) {
+        return a.pageIndex - b.pageIndex;
+    }
+
+    reference operator[](difference_type n) const { return *(*this + n); }
+
+    bool operator==(const PageIterator& other) const {
+        return pageIndex == other.pageIndex;
+    }
+
+    auto operator<=>(const PageIterator& other) const {
+        return pageIndex <=> other.pageIndex;
+    }
+
+   private:
+    size_t pageIndex;
+    PageProxy proxy;
 };
 
 #endif
