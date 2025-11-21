@@ -9,6 +9,7 @@
 #include "record.hpp"
 
 class Buffer {
+   public:
     Buffer(
         std::shared_ptr<BufferedFile> file, size_t startPageIndex,
         size_t pageCount
@@ -21,7 +22,7 @@ class Buffer {
     std::vector<Record> page;
     std::shared_ptr<BufferedFile> file;
 
-    void readPage(size_t pageIndex);
+    void setPage(size_t pageIndex);
 };
 
 #endif  // !BUFFER_HPPP
