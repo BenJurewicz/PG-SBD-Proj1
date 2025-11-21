@@ -9,7 +9,7 @@
 #include <string>
 
 BufferedFile::BufferedFile(const char* fileName)
-    : file(fileName, std::ios::in | std::ios::out), page(recordsPerPage) {
+    : file(fileName, std::ios::in | std::ios::out) {
     // If file does not exist create it
     if (!file.is_open()) {
         file.open(fileName, std::ios::out);
@@ -100,6 +100,9 @@ size_t BufferedFile::pIndexToOffset(size_t pageIndex) {
 
 Record BufferedFile::read(size_t index) {
     size_t pageIndex = rIndexToPageIndex(index);
+    if (pageIndex >= getPageCount()) {
+        throw std::out_of_range("Record index is out of bounds.");
+    }
     size_t inPageIndex = rIndexToInPageIndex(index);
     loadPage(pageIndex);
     return page.at(inPageIndex);
@@ -119,6 +122,9 @@ void BufferedFile::write(size_t index, Record data) {
 std::optional<BufferedFile::BufferType> BufferedFile::readPage(
     size_t pageIndex
 ) {
+    if (pageIndex >= getPageCount()) {
+        throw std::out_of_range("Page index is out of bounds.");
+    }
     loadPage(pageIndex);
     return isCurrentPageEmpty() ? std::nullopt : std::optional(page);
 }

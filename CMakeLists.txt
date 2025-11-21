@@ -18,3 +18,4 @@ aux_source_directory(src/util UTIL_SOURCES)
 
 add_executable(create_files src/create_files.cpp ${UTIL_SOURCES})
 add_executable(sort_files src/sort_files.cpp ${UTIL_SOURCES})
+add_executable(test_iterator src/test_iterator.cpp ${UTIL_SOURCES})
