@@ -34,8 +34,9 @@ class BufferedFile {
     // Completly overwrites the current page and increments the page index
     void writePage(RangeOfRecords auto const& page) {
         BufferType tmp;
-        tmp.reserve(30);
-
+        tmp.reserve(recordsPerPage);
+        // TODO: Make sure page is recordsPerPage long, add empty records
+        // if shorter
         for (auto const& r : page) {
             if (tmp.size() >= recordsPerPage) {
                 break;
