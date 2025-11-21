@@ -132,7 +132,14 @@ class BufferedFile {
 
         reference operator[](difference_type n) const { return *(*this + n); }
 
-        auto operator<=>(const PageIterator& other) const = default;
+        bool operator==(const PageIterator& other) const {
+            return pageIndex == other.pageIndex;
+        }
+
+        auto operator<=>(const PageIterator& other) const {
+            return pageIndex <=> other.pageIndex;
+        }
+
 
        private:
         BufferedFile* file;
