@@ -117,34 +117,18 @@ class BufferedFile::PageProxy {
    public:
     friend class PageIterator;
 
-    operator std::vector<Record>() const { return records(); }
-
-    std::vector<Record> records() const {
-        auto pageOpt = file->readPage(pageIndex);
-        if (pageOpt) {
-            return *pageOpt;
-        }
-        return {};
-    }
-
-    Record operator[](size_t recordIndexInPage) const {
-        if (recordIndexInPage >= recordsPerPage) {
-            throw std::out_of_range("Record index out of page bounds");
-        }
-        return file->read(pageIndex * recordsPerPage + recordIndexInPage);
-    }
+    operator std::vector<Record>() const;
+    std::vector<Record> records() const;
+    Record operator[](size_t recordIndexInPage) const;
 
     void operator=(RangeOfRecords auto const& newPage) {
         file->writePage(pageIndex, newPage);
     }
-
     auto operator<=>(const PageProxy& other) const = default;
 
    private:
-    PageProxy(BufferedFile* file, size_t pageIndex)
-        : file(file), pageIndex(pageIndex) {}
-
-    void setPageIndex(size_t newPageIndex) { pageIndex = newPageIndex; }
+    PageProxy(BufferedFile* file, size_t pageIndex);
+    void setPageIndex(size_t newPageIndex);
 
     BufferedFile* file;
     size_t pageIndex;

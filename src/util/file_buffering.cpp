@@ -177,3 +177,37 @@ void BufferedFile::seekpWithExtend(
     extendFile(offset + pageSize);
     file.seekp(offset, dir);
 }
+
+// ============================================================================
+// PageProxy
+// ============================================================================
+
+BufferedFile::PageProxy::PageProxy(BufferedFile* file, size_t pageIndex)
+    : file(file), pageIndex(pageIndex) {}
+
+BufferedFile::PageProxy::operator std::vector<Record>() const {
+    return records();
+}
+
+std::vector<Record> BufferedFile::PageProxy::records() const {
+    auto pageOpt = file->readPage(pageIndex);
+    if (pageOpt) {
+        return *pageOpt;
+    }
+    return {};
+}
+
+Record BufferedFile::PageProxy::operator[](size_t recordIndexInPage) const {
+    if (recordIndexInPage >= recordsPerPage) {
+        throw std::out_of_range("Record index out of page bounds");
+    }
+    return file->read(pageIndex * recordsPerPage + recordIndexInPage);
+}
+
+void BufferedFile::PageProxy::setPageIndex(size_t newPageIndex) {
+    pageIndex = newPageIndex;
+}
+
+// ============================================================================
+// PageIterator
+// ============================================================================
