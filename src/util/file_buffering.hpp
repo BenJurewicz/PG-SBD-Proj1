@@ -27,6 +27,8 @@ class BufferedFile {
     void flush();
     // Checks if the current page is empty
     bool isCurrentPageEmpty();
+    // Returns the page with a given index if it exists
+    std::optional<BufferType> readPage(size_t pageIndex);
     // Returns the current page and increments the page index
     std::optional<BufferType> readPage();
     // Completly overwrites the current page and increments the page index

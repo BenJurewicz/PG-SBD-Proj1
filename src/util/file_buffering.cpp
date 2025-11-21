@@ -116,6 +116,13 @@ void BufferedFile::write(size_t index, Record data) {
     isPageModified = true;
 }
 
+std::optional<BufferedFile::BufferType> BufferedFile::readPage(
+    size_t pageIndex
+) {
+    loadPage(pageIndex);
+    return isCurrentPageEmpty() ? std::nullopt : std::optional(page);
+}
+
 std::optional<BufferedFile::BufferType> BufferedFile::readPage() {
     auto retVal = isCurrentPageEmpty() ? std::nullopt : std::optional(page);
     loadPage(currentPageIndex + 1);
