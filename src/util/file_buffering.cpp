@@ -21,6 +21,51 @@ BufferedFile::BufferedFile(const char* fileName)
 
 BufferedFile::~BufferedFile() { flush(); }
 
+Record BufferedFile::read(size_t index) {
+    size_t pageIndex = rIndexToPageIndex(index);
+    if (pageIndex >= getPageCount()) {
+        throw std::out_of_range("Record index is out of bounds.");
+    }
+    size_t inPageIndex = rIndexToInPageIndex(index);
+    loadPage(pageIndex);
+    return page.at(inPageIndex);
+}
+
+void BufferedFile::write(size_t index, Record data) {
+    size_t pageIndex = rIndexToPageIndex(index);
+
+    if (pageIndex > getPageCount()) {
+        throw std::out_of_range(
+            "Cannot write: record index is beyond current file content and not "
+            "an append operation."
+        );
+    }
+
+    size_t inPageIndex = rIndexToInPageIndex(index);
+    loadPage(pageIndex);
+
+    data.resize(recordSize);
+
+    page.at(inPageIndex) = data;
+    isPageModified = true;
+}
+
+void BufferedFile::flush() {
+    if (!isPageModified) {
+        return;
+    }
+
+    std::fstream::off_type offset = pIndexToOffset(currentPageIndex);
+    seekpWithExtend(offset, std::ios::beg);
+
+    for (const auto& line : page) {
+        file.write(line.data().data(), line.lenght());
+    }
+
+    file.flush();
+    isPageModified = false;
+}
+
 void BufferedFile::loadPage(size_t pageIndex) {
     if (pageIndex == currentPageIndex) {
         return;
@@ -51,22 +96,6 @@ void BufferedFile::loadPage(size_t pageIndex) {
     }
 
     currentPageIndex = pageIndex;
-}
-
-void BufferedFile::flush() {
-    if (!isPageModified) {
-        return;
-    }
-
-    std::fstream::off_type offset = pIndexToOffset(currentPageIndex);
-    seekpWithExtend(offset, std::ios::beg);
-
-    for (const auto& line : page) {
-        file.write(line.data().data(), line.lenght());
-    }
-
-    file.flush();
-    isPageModified = false;
 }
 
 size_t BufferedFile::getPageCount() {
@@ -103,35 +132,6 @@ size_t BufferedFile::rIndexToInPageIndex(size_t index) {
 
 size_t BufferedFile::pIndexToOffset(size_t pageIndex) {
     return pageIndex * pageSize;
-}
-
-Record BufferedFile::read(size_t index) {
-    size_t pageIndex = rIndexToPageIndex(index);
-    if (pageIndex >= getPageCount()) {
-        throw std::out_of_range("Record index is out of bounds.");
-    }
-    size_t inPageIndex = rIndexToInPageIndex(index);
-    loadPage(pageIndex);
-    return page.at(inPageIndex);
-}
-
-void BufferedFile::write(size_t index, Record data) {
-    size_t pageIndex = rIndexToPageIndex(index);
-
-    if (pageIndex > getPageCount()) {
-        throw std::out_of_range(
-            "Cannot write: record index is beyond current file content and not "
-            "an append operation."
-        );
-    }
-
-    size_t inPageIndex = rIndexToInPageIndex(index);
-    loadPage(pageIndex);
-
-    data.resize(recordSize);
-
-    page.at(inPageIndex) = data;
-    isPageModified = true;
 }
 
 std::optional<BufferedFile::BufferType> BufferedFile::readPage(
