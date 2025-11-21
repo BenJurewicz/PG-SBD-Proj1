@@ -1,6 +1,8 @@
+#ifndef RECORD_HPP
+#define RECORD_HPP
+
 #include <cstddef>
 #include <string>
-#ifndef RECORD_HPP
 
 class Record {
    public:
