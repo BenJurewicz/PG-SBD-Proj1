@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <file_buffering.hpp>
+#include <functional>
 #include <iostream>
 #include <ostream>
 #include <queue>
@@ -34,8 +35,23 @@ int main() {
     BufferedFile& dest = t;
 
     size_t pageCount = f.getPageCount();
+    size_t totalRecordCount = f.getRecordCount();
     size_t runLenInPages = buffers.size();
     size_t readPages = 0;
+
+    auto cmp = [&](auto& a, auto& b) {
+        return buffers[a.first][a.second] > buffers[b.first][b.second];
+    };
+    std::priority_queue<
+        std::pair<size_t, size_t>,
+        std::vector<std::pair<size_t, size_t>>,
+        decltype(cmp)>
+        pq(cmp);
+    size_t phaseCount = 0;
+
+    while (runLenInPages * BufferedFile::recordsPerPage < totalRecordCount) {
+        phaseCount++;
+    }
 
     // NOTE: Change BufferedFile so that reads returns a std::optional
     // so it can fail if you leave the file and write will write anywhere in

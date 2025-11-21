@@ -54,13 +54,13 @@ class BufferedFile {
     size_t getPageCount();
     size_t getRecordCount();
 
-   private:
     // Record Size in bytes
     static constexpr size_t recordSize = Record::maxLen;
     static constexpr size_t recordsPerPage = 10;
     // Page size in bytes
     static constexpr size_t pageSize = recordsPerPage * recordSize;
 
+   private:
     std::fstream file;
     std::vector<Record> page;
     size_t currentPageIndex = -1;
