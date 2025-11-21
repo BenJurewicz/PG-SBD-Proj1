@@ -74,7 +74,7 @@ class BufferedFile {
     // corresponding page
     size_t rIndexToInPageIndex(size_t index);
     // Converts a page index into a character offset within the file
-    size_t bIndexToOffset(size_t index);
+    size_t pIndexToOffset(size_t index);
 
     void loadPage(size_t pageIndex);
     std::streampos getFileSize();

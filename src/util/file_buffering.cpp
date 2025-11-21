@@ -27,7 +27,7 @@ void BufferedFile::loadPage(size_t pageIndex) {
     }
     flush();
 
-    size_t offset = bIndexToOffset(pageIndex);
+    size_t offset = pIndexToOffset(pageIndex);
     file.seekg(offset, std::ios::beg);
 
     page.clear();
@@ -58,7 +58,7 @@ void BufferedFile::flush() {
         return;
     }
 
-    std::fstream::off_type offset = bIndexToOffset(currentPageIndex);
+    std::fstream::off_type offset = pIndexToOffset(currentPageIndex);
     seekpWithExtend(offset, std::ios::beg);
 
     for (const auto& line : page) {
@@ -94,7 +94,7 @@ size_t BufferedFile::rIndexToInPageIndex(size_t index) {
     return (index % recordsPerPage);
 }
 
-size_t BufferedFile::bIndexToOffset(size_t pageIndex) {
+size_t BufferedFile::pIndexToOffset(size_t pageIndex) {
     return pageIndex * pageSize;
 }
 
