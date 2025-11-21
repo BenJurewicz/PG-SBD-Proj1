@@ -90,6 +90,7 @@ void BufferedFile::loadPage(size_t pageIndex) {
     file.clear();  // Clear flags in case we stumbled upon eof
 
     // Fill the page in case we run into the end of the file
+    // TODO: Use page.resize(pageSize, Record::empty); here
     while (i < recordsPerPage) {
         page.push_back(Record::empty);
         i++;
