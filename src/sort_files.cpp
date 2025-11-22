@@ -88,6 +88,9 @@ void createRunsInFile(
             }
             b = *fBegin++;
         }
+        if (std::ranges::all_of(buffers, [](auto& b) { return b.empty(); })) {
+            break;
+        }
 
         // f.setPageIndex(pageIndex);
         // std::optional<BufferedFile::BufferType> page = f.readPage();
@@ -135,6 +138,10 @@ void createRunsInFile(
             if (elemIdx + 1 < buffers[bufIdx].size()) {
                 pq.push({bufIdx, elemIdx + 1});
             }
+        }
+
+        for (auto& b : buffers) {
+            b.clear();
         }
     }
 }
