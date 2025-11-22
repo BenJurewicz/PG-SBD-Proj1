@@ -218,10 +218,6 @@ Record BufferedFile::PageProxy::operator[](size_t recordIndexInPage) const {
     return file->read(pageIndex * recordsPerPage + recordIndexInPage);
 }
 
-void BufferedFile::PageProxy::setPageIndex(size_t newPageIndex) {
-    pageIndex = newPageIndex;
-}
-
 // ============================================================================
 // PageIterator
 // ============================================================================

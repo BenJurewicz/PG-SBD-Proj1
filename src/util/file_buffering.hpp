@@ -131,7 +131,6 @@ class BufferedFile::PageProxy {
 
    private:
     PageProxy(BufferedFile* file, size_t pageIndex);
-    void setPageIndex(size_t newPageIndex);
 
     BufferedFile* file;
     size_t pageIndex;
