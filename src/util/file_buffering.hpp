@@ -4,12 +4,12 @@
 #include <compare>
 #include <concepts>
 #include <cstddef>
+#include <error.hpp>
 #include <fstream>
 #include <ios>
 #include <iosfwd>
 #include <optional>
 #include <record.hpp>
-#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -43,9 +43,12 @@ class BufferedFile {
 
     void writePage(size_t pageIndex, RangeOfRecords auto const& newPage) {
         if (pageIndex > getPageCount()) {
-            throw std::out_of_range(
-                "Cannot write: page index is beyond current file content and"
-                "not an append operation."
+            THROW_FORMATTED(
+                std::out_of_range,
+                "Writing Page failed. "
+                "Provided pageIndex={} is beyond current file "
+                "content and is not an append.",
+                pageIndex
             );
         }
 

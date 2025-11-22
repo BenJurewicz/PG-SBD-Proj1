@@ -28,11 +28,10 @@ BufferedFile::~BufferedFile() { flush(); }
 Record BufferedFile::read(size_t index) {
     size_t pageIndex = rIndexToPageIndex(index);
     if (pageIndex >= getPageCount()) {
-        throw std::out_of_range("Record index is out of bounds.");
         THROW_FORMATTED(
             std::out_of_range,
-            "Read failed. "
-            "Provided recoidIndex={} is beyond current file",
+            "Reading Record failed. "
+            "Provided recoidIndex={} is beyond current file content",
             index
         );
     }
@@ -47,7 +46,8 @@ void BufferedFile::write(size_t index, Record data) {
     if (pageIndex > getPageCount()) {
         THROW_FORMATTED(
             std::out_of_range,
-            "Write failed. Provided recoidIndex={} is beyond current file "
+            "Writing Record failed. "
+            "Provided recoidIndex={} is beyond current file "
             "content and is not an append.",
             index
         );
@@ -88,7 +88,12 @@ std::optional<BufferedFile::BufferType> BufferedFile::readPage(
     size_t pageIndex
 ) {
     if (pageIndex >= getPageCount()) {
-        throw std::out_of_range("Page index is out of bounds.");
+        THROW_FORMATTED(
+            std::out_of_range,
+            "Reading Page failed. "
+            "Provided pageIndex={} is beyond current file content",
+            pageIndex
+        );
     }
     loadPage(pageIndex);
     return isCurrentPageEmpty() ? std::nullopt : std::optional(page);
@@ -210,9 +215,6 @@ std::vector<Record> BufferedFile::PageProxy::records() const {
 }
 
 Record BufferedFile::PageProxy::operator[](size_t recordIndexInPage) const {
-    if (recordIndexInPage >= recordsPerPage) {
-        throw std::out_of_range("Record index out of page bounds");
-    }
     return file->read(pageIndex * recordsPerPage + recordIndexInPage);
 }
 
