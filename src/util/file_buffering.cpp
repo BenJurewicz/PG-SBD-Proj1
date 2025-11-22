@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <compare>
 #include <cstddef>
 #include <file_buffering.hpp>
 #include <fstream>
@@ -213,7 +214,7 @@ void BufferedFile::PageProxy::setPageIndex(size_t newPageIndex) {
 // ============================================================================
 
 BufferedFile::PageIterator::PageIterator(BufferedFile* file, size_t pageIndex)
-    : pageIndex(pageIndex), proxy(file, pageIndex) {}
+    : file(file), pageIndex(pageIndex), proxy(file, pageIndex) {}
 
 BufferedFile::PageIterator::reference BufferedFile::PageIterator::operator*() {
     proxy.setPageIndex(pageIndex);
@@ -295,5 +296,17 @@ BufferedFile::PageIterator::reference BufferedFile::PageIterator::operator[](
 }
 
 bool BufferedFile::PageIterator::operator==(const PageIterator& other) const {
-    return pageIndex == other.pageIndex;
+    return file == other.file && pageIndex == other.pageIndex;
+}
+
+std::partial_ordering BufferedFile::PageIterator::operator<=>(
+    const PageIterator& other
+) const {
+    if (file != other.file) {
+        return std::partial_ordering::unordered;
+    } else {
+        return static_cast<std::partial_ordering>(
+            pageIndex <=> other.pageIndex
+        );
+    }
 }

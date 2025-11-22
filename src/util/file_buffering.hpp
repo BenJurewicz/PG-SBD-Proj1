@@ -166,9 +166,10 @@ class BufferedFile::PageIterator {
     reference operator[](difference_type n) const;
 
     bool operator==(const PageIterator& other) const;
-    auto operator<=>(const PageIterator& other) const = default;
+    std::partial_ordering operator<=>(const PageIterator& other) const;
 
    private:
+    BufferedFile* file;
     size_t pageIndex;
     PageProxy proxy;
 };
