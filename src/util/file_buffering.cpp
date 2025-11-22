@@ -12,6 +12,10 @@
 #include <stdexcept>
 #include <string>
 
+// ============================================================================
+// BufferedFile
+// ============================================================================
+
 BufferedFile::BufferedFile(const char* fileName)
     : file(fileName, std::ios::in | std::ios::out) {
     // If file does not exist create it
