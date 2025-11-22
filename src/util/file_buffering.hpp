@@ -62,10 +62,14 @@ class BufferedFile {
         using reference = PageProxy;
 
         PageIterator(BufferedFile* file, size_t pageIndex);
+        PageIterator(PageSentinel ps);
 
         reference operator*() const;
 
         pointer operator->() const;
+
+        BufferedFile* get_file() const;
+        size_t get_page_index() const;
 
         PageIterator& operator++();
         PageIterator operator++(int);
@@ -105,6 +109,7 @@ class BufferedFile {
 
     class PageSentinel {
        public:
+        friend BufferedFile::PageIterator;
         using diffType = PageIterator::difference_type;
 
         PageSentinel() = default;
@@ -124,6 +129,9 @@ class BufferedFile {
         friend PageIterator::difference_type operator-(
             const PageSentinel& s, const PageIterator& it
         );
+
+        BufferedFile* get_file() const { return file; }
+        size_t get_page_index() const { return pageIndex; }
 
        private:
         BufferedFile* file = nullptr;

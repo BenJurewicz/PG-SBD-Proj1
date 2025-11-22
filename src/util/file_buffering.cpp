@@ -235,6 +235,16 @@ Record BufferedFile::PageProxy::operator[](size_t recordIndexInPage) const {
 BufferedFile::PageIterator::PageIterator(BufferedFile* file, size_t pageIndex)
     : file(file), pageIndex(pageIndex) {}
 
+BufferedFile::PageIterator::PageIterator(BufferedFile::PageSentinel ps) {
+    if (ps.file == nullptr) {
+        THROW_FORMATTED(
+            std::invalid_argument,
+            "The program tried to make a PageIterator from a PageSentinel "
+            "without initialized file"
+        );
+    }
+}
+
 BufferedFile::PageIterator::reference
 BufferedFile::PageIterator::operator*() const {
     return PageProxy(file, pageIndex);
@@ -244,6 +254,10 @@ BufferedFile::PageIterator::pointer
 BufferedFile::PageIterator::operator->() const {
     return PageProxy(file, pageIndex);
 }
+
+BufferedFile* BufferedFile::PageIterator::get_file() const { return file; }
+
+size_t BufferedFile::PageIterator::get_page_index() const { return pageIndex; }
 
 BufferedFile::PageIterator& BufferedFile::PageIterator::operator++() {
     pageIndex++;
