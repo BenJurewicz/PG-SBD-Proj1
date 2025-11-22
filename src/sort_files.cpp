@@ -137,6 +137,9 @@ void createRunsInFile(BufferedFile& f) {
             }
             b = *fBegin++;
         }
+        if (std::ranges::all_of(buffers, [](auto& b) { return b.empty(); })) {
+            break;
+        }
 
         // Sort:
         for (auto& b : buffers) {
@@ -170,6 +173,10 @@ void createRunsInFile(BufferedFile& f) {
             if (elemIdx + 1 < buffers[bufIdx].size()) {
                 pq.push({bufIdx, elemIdx + 1});
             }
+        }
+
+        for (auto& b : buffers) {
+            b.clear();
         }
     }
 }
