@@ -128,12 +128,7 @@ size_t BufferedFile::getRecordCount() {
 //     auto end = PageSentinel(this, getPageCount());
 //     return std::ranges::subrange(begin, end);
 // }
-std::ranges::subrange<BufferedFile::PageIterator, BufferedFile::PageSentinel>
-BufferedFile::pages() {
-    auto begin = PageIterator(this, 0);
-    auto end = PageSentinel(this, getPageCount());
-    return std::ranges::subrange<PageIterator, PageSentinel>(begin, end);
-}
+
 
 // BufferedFile::PageIterator BufferedFile::begin() {
 //     return PageIterator(this, 0);
@@ -242,11 +237,13 @@ Record BufferedFile::PageProxy::operator[](size_t recordIndexInPage) const {
 BufferedFile::PageIterator::PageIterator(BufferedFile* file, size_t pageIndex)
     : file(file), pageIndex(pageIndex) {}
 
-BufferedFile::PageIterator::reference BufferedFile::PageIterator::operator*() {
+BufferedFile::PageIterator::reference
+BufferedFile::PageIterator::operator*() const {
     return PageProxy(file, pageIndex);
 }
 
-BufferedFile::PageIterator::pointer BufferedFile::PageIterator::operator->() {
+BufferedFile::PageIterator::pointer
+BufferedFile::PageIterator::operator->() const {
     return PageProxy(file, pageIndex);
 }
 

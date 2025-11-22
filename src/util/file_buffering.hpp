@@ -54,9 +54,9 @@ class BufferedFile {
 
         PageIterator(BufferedFile* file, size_t pageIndex);
 
-        reference operator*();
+        reference operator*() const;
 
-        pointer operator->();
+        pointer operator->() const;
 
         PageIterator& operator++();
         PageIterator operator++(int);
@@ -168,7 +168,11 @@ class BufferedFile {
     size_t getPageCount();
     size_t getRecordCount();
 
-    std::ranges::subrange<PageIterator, PageSentinel> pages();
+    auto pages() {
+        auto begin = PageIterator(this, 0);
+        auto end = PageSentinel(this, getPageCount());
+        return std::ranges::subrange(begin, end);
+    }
 
     // Record Size in bytes
     static constexpr size_t recordSize = Record::maxLen;
