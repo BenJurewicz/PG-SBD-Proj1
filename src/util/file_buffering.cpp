@@ -2,11 +2,14 @@
 #include <cmath>
 #include <compare>
 #include <cstddef>
+#include <error.hpp>
 #include <file_buffering.hpp>
+#include <format>
 #include <fstream>
 #include <ios>
 #include <iosfwd>
 #include <optional>
+#include <stdexcept>
 #include <string>
 
 BufferedFile::BufferedFile(const char* fileName)
@@ -26,6 +29,12 @@ Record BufferedFile::read(size_t index) {
     size_t pageIndex = rIndexToPageIndex(index);
     if (pageIndex >= getPageCount()) {
         throw std::out_of_range("Record index is out of bounds.");
+        THROW_FORMATTED(
+            std::out_of_range,
+            "Read failed. "
+            "Provided recoidIndex={} is beyond current file",
+            index
+        );
     }
     size_t inPageIndex = rIndexToInPageIndex(index);
     loadPage(pageIndex);
@@ -36,9 +45,11 @@ void BufferedFile::write(size_t index, Record data) {
     size_t pageIndex = rIndexToPageIndex(index);
 
     if (pageIndex > getPageCount()) {
-        throw std::out_of_range(
-            "Cannot write: record index is beyond current file content and not "
-            "an append operation."
+        THROW_FORMATTED(
+            std::out_of_range,
+            "Write failed. Provided recoidIndex={} is beyond current file "
+            "content and is not an append.",
+            index
         );
     }
 
