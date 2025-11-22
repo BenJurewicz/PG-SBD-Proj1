@@ -26,7 +26,7 @@ int main() {
 
     size_t maxi = 100;
     for (size_t i = 0; i < maxi; i++) {
-        f->write(maxi - 1 - i, std::to_string(i));
+        f->write(i, std::to_string(maxi - 1 - i));
     }
 
     std::vector<std::vector<Record>> buffers(bufferCount);
@@ -63,6 +63,8 @@ int main() {
     // the already written section or directly after it
 
     std::cout << "Finished" << std::endl;
+    std::cout << "Write Count: " << BufferedFile::writeCount << std::endl;
+    std::cout << "Read Count: " << BufferedFile::readCout << std::endl;
     return 0;
 }
 
@@ -73,26 +75,33 @@ void createRunsInFile(
 
     f.resetPageIndex();
     size_t pageIndex = f.getPageIndex();
+    auto fBegin = f.pages().begin();
+    auto fEnd = f.pages().end();
     bool isFileEmpty = false;
     size_t recordIndex = 0;
 
     while (!isFileEmpty) {
-        // TODO: This would be better as a iterator on pages
-        // This way there would be no need for f.getPageIndex()
-        // and f.resetPageIndex()
-        f.setPageIndex(pageIndex);
-        std::optional<BufferedFile::BufferType> page = f.readPage();
-
-        // Fill bufffers
         for (auto& b : buffers) {
-            if (!page.has_value()) {
+            if (fBegin == fEnd) {
                 isFileEmpty = true;
                 break;
             }
-            b = page.value();
-            page = f.readPage();
+            b = *fBegin++;
         }
-        pageIndex = f.getPageIndex();
+
+        // f.setPageIndex(pageIndex);
+        // std::optional<BufferedFile::BufferType> page = f.readPage();
+        //
+        // // Fill bufffers
+        // for (auto& b : buffers) {
+        //     if (!page.has_value()) {
+        //         isFileEmpty = true;
+        //         break;
+        //     }
+        //     b = page.value();
+        //     page = f.readPage();
+        // }
+        // pageIndex = f.getPageIndex();
 
         // Sort:
         for (auto& b : buffers) {
