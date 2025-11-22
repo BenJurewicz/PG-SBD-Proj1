@@ -1,28 +1,34 @@
+#ifndef BUFFER_HPP
+#define BUFFER_HPP
 
-// #define BUFFER_HPP
-//
-// #include <cstddef>
-// #include <memory>
-// #include <vector>
-//
-// #include "file_buffering.hpp"
-// #include "record.hpp"
-//
-// class Buffer {
-//    public:
-//     Buffer(
-//         std::shared_ptr<BufferedFile> file, size_t startPageIndex,
-//         size_t pageCount
-//     );
-//
-//    private:
-//     size_t startPageIndex;
-//     size_t pageCount;
-//
-//     std::vector<Record> page;
-//     std::shared_ptr<BufferedFile> file;
-//
-//     void setPage(size_t pageIndex);
-// };
-//
-// #endif  // !BUFFER_HPP
+#include <cstddef>
+#include <vector>
+
+#include "file_buffering.hpp"
+#include "record.hpp"
+
+class Buffer {
+   public:
+    Buffer(BufferedFile::PageIterator begin, BufferedFile::PageIterator end);
+
+    Buffer operator=(std::ranges::subrange<
+                     BufferedFile::PageIterator, BufferedFile::PageSentinel>
+                         range);
+
+    bool empty();
+    Record operator[](size_t index);
+    void push_back(Record r);
+    size_t size();
+    void clear();
+
+   private:
+    BufferedFile::PageIterator current;
+    BufferedFile::PageIterator begin;
+    BufferedFile::PageIterator end;
+
+    size_t startIndex, endIndex;
+
+    std::vector<Record> page;
+};
+
+#endif  // !BUFFER_HPP
