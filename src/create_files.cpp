@@ -7,13 +7,16 @@
 
 std::default_random_engine rng{std::random_device{}()};
 
-std::string generate_random_string(int maxLength) {
+std::string generate_random_string(int maxLength, bool numOnly = false) {
     std::uniform_int_distribution<int> len_dist(1, maxLength);
     // ASCII printable characters are in rage [32,126]
     // but whe start from 33 as (char)32 is space.
     // NOTE: (char)33 == '!'; (char)126 == '~';
     // TODO: Ocasinally got non ascii chars here
-    std::uniform_int_distribution<int> char_dist(33, 126);
+    std::uniform_int_distribution<int> all_char_dist(33, 126);
+    std::uniform_int_distribution<int> num_dist('0', '9');
+
+    auto char_dist = numOnly ? num_dist : all_char_dist;
 
     int length = len_dist(rng);
     std::string random_string;
@@ -26,9 +29,12 @@ std::string generate_random_string(int maxLength) {
 
 void manual_mode(std::vector<std::string>& lines) {
     std::string line;
-    std::cout
-        << "Enter lines of text (up to 30 characters). Type '!q' to finish."
-        << std::endl;
+    std::cout << std::format(
+                     "Enter lines of text (up to {} characters). Type '!q' to "
+                     "finish.",
+                     Record::maxLen
+                 )
+              << std::endl;
 
     while (true) {
         std::getline(std::cin, line);
@@ -39,7 +45,10 @@ void manual_mode(std::vector<std::string>& lines) {
 
         if (line.length() > Record::maxLen) {
             std::cout
-                << "Error: String exceeds 30 characters. Please try again."
+                << std::format(
+                       "Error: String exceeds {} characters. Please try again.",
+                       Record::maxLen
+                   )
                 << std::endl;
             break;
         }
@@ -48,14 +57,14 @@ void manual_mode(std::vector<std::string>& lines) {
     }
 }
 
-void auto_mode(std::vector<std::string>& lines) {
+void auto_mode(std::vector<std::string>& lines, bool numOnly = false) {
     int num_strings;
     std::cout << "Enter the number of strings to generate: ";
     std::cin >> num_strings;
     std::cin.ignore();
 
     for (int i = 0; i < num_strings; ++i) {
-        lines.push_back(generate_random_string(Record::maxLen));
+        lines.push_back(generate_random_string(Record::maxLen, numOnly));
     }
     std::cout << num_strings << " random strings generated." << std::endl;
 }
@@ -93,8 +102,10 @@ int get_user_choice() {
     int choice;
     std::cout << "\nChoose an option:" << std::endl;
     std::cout << "1. Manual input" << std::endl;
-    std::cout << "2. Automatic generation" << std::endl;
-    std::cout << "3. Save and quit" << std::endl;
+    std::cout << "2. Automatic generation (all printable characters)"
+              << std::endl;
+    std::cout << "3. Automatic generation (numbers only)" << std::endl;
+    std::cout << "4. Save and quit" << std::endl;
     std::cout << "Enter your choice: ";
     std::cin >> choice;
     std::cin.ignore();
@@ -115,12 +126,15 @@ int main() {
                 auto_mode(lines);
                 break;
             case 3:
+                auto_mode(lines, true);
+                break;
+            case 4:
                 save_file(lines);
                 break;
             default:
                 std::cout << "Invalid choice. Please try again." << std::endl;
         }
-    } while (choice != 3);
+    } while (choice != 4);
 
     return 0;
 }
