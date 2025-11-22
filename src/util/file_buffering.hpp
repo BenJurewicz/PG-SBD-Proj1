@@ -19,6 +19,15 @@ concept RangeOfRecords = std::ranges::range<R> &&
 
 class BufferedFile {
    public:
+    // Record Size in bytes
+    static constexpr size_t recordSize = Record::maxLen;
+    static constexpr size_t recordsPerPage = 10;
+    // Page size in bytes
+    static constexpr size_t pageSize = recordsPerPage * recordSize;
+
+    static size_t readCout;
+    static size_t writeCount;
+
     class PageProxy;
     class PageIterator;
     class PageSentinel;
@@ -185,12 +194,6 @@ class BufferedFile {
         auto end = PageSentinel(this, getPageCount());
         return std::ranges::subrange(begin, end);
     }
-
-    // Record Size in bytes
-    static constexpr size_t recordSize = Record::maxLen;
-    static constexpr size_t recordsPerPage = 10;
-    // Page size in bytes
-    static constexpr size_t pageSize = recordsPerPage * recordSize;
 
    private:
     std::fstream file;

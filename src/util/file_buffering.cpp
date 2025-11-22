@@ -16,6 +16,9 @@
 // BufferedFile
 // ============================================================================
 
+size_t BufferedFile::readCout = 0;
+size_t BufferedFile::writeCount = 0;
+
 BufferedFile::BufferedFile(const char* fileName)
     : file(fileName, std::ios::in | std::ios::out) {
     // If file does not exist create it
@@ -80,6 +83,7 @@ void BufferedFile::flush() {
 
     file.flush();
     isPageModified = false;
+    writeCount++;
 }
 
 bool BufferedFile::isCurrentPageEmpty() {
@@ -116,7 +120,15 @@ size_t BufferedFile::getPageCount() {
 }
 
 size_t BufferedFile::getRecordCount() {
-    flush();
+    file.seekg(0, std::ios::end);
+    auto lastPageIndex = static_cast<size_t>(
+        std::floor(static_cast<float>(file.tellg()) / pageSize)
+    );
+
+    if (currentPageIndex >= lastPageIndex) {
+        flush();
+    }
+
     file.seekg(0, std::ios::end);
     auto lastFileIndex = static_cast<float>(file.tellg());
     return std::ceil(lastFileIndex / recordSize);
@@ -165,6 +177,7 @@ void BufferedFile::loadPage(size_t pageIndex) {
     }
 
     currentPageIndex = pageIndex;
+    readCout++;
 }
 
 std::streampos BufferedFile::getFileSize() {
