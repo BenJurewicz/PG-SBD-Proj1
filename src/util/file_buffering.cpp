@@ -214,16 +214,14 @@ void BufferedFile::PageProxy::setPageIndex(size_t newPageIndex) {
 // ============================================================================
 
 BufferedFile::PageIterator::PageIterator(BufferedFile* file, size_t pageIndex)
-    : file(file), pageIndex(pageIndex), proxy(file, pageIndex) {}
+    : file(file), pageIndex(pageIndex) {}
 
 BufferedFile::PageIterator::reference BufferedFile::PageIterator::operator*() {
-    proxy.setPageIndex(pageIndex);
-    return proxy;
+    return PageProxy(file, pageIndex);
 }
 
 BufferedFile::PageIterator::pointer BufferedFile::PageIterator::operator->() {
-    proxy.setPageIndex(pageIndex);
-    return &proxy;
+    return PageProxy(file, pageIndex);
 }
 
 BufferedFile::PageIterator& BufferedFile::PageIterator::operator++() {

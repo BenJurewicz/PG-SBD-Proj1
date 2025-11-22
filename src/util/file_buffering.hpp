@@ -139,7 +139,7 @@ class BufferedFile::PageIterator {
     using iterator_category = std::random_access_iterator_tag;
     using value_type = PageProxy;
     using difference_type = std::ptrdiff_t;
-    using pointer = PageProxy*;
+    using pointer = PageProxy;
     using reference = PageProxy;
 
     PageIterator(BufferedFile* file, size_t pageIndex);
@@ -171,7 +171,6 @@ class BufferedFile::PageIterator {
    private:
     BufferedFile* file;
     size_t pageIndex;
-    PageProxy proxy;
 };
 
 #endif
