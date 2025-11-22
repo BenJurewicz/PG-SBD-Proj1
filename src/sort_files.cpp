@@ -73,10 +73,7 @@ void createRunsInFile(
 ) {
     std::cout << "Stage 1: Divide into runs" << std::endl;
 
-    f.resetPageIndex();
-    size_t pageIndex = f.getPageIndex();
-    auto fBegin = f.pages().begin();
-    auto fEnd = f.pages().end();
+    auto [fBegin, fEnd] = f.pages();
     bool isFileEmpty = false;
     size_t recordIndex = 0;
 
@@ -89,23 +86,9 @@ void createRunsInFile(
             b = *fBegin++;
         }
 
-        // f.setPageIndex(pageIndex);
-        // std::optional<BufferedFile::BufferType> page = f.readPage();
-        //
-        // // Fill bufffers
-        // for (auto& b : buffers) {
-        //     if (!page.has_value()) {
-        //         isFileEmpty = true;
-        //         break;
-        //     }
-        //     b = page.value();
-        //     page = f.readPage();
-        // }
-        // pageIndex = f.getPageIndex();
-
         // Sort:
         for (auto& b : buffers) {
-            std::sort(b.begin(), b.end());
+            std::ranges::sort(b);
         }
 
         // K-way merge
