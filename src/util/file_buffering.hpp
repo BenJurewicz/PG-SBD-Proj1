@@ -21,6 +21,93 @@ class BufferedFile {
    public:
     class PageProxy;
     class PageIterator;
+    class PageSentinel;
+
+    class PageProxy {
+       public:
+        friend class PageIterator;
+
+        operator std::vector<Record>() const;
+        std::vector<Record> records() const;
+        Record operator[](size_t recordIndexInPage) const;
+
+        PageProxy operator=(RangeOfRecords auto const& newPage) {
+            file->writePage(pageIndex, newPage);
+            return *this;
+        }
+        auto operator<=>(const PageProxy& other) const = default;
+
+       private:
+        PageProxy(BufferedFile* file, size_t pageIndex);
+
+        BufferedFile* file;
+        size_t pageIndex;
+    };
+
+    class PageIterator {
+       public:
+        using iterator_category = std::random_access_iterator_tag;
+        using value_type = PageProxy;
+        using difference_type = std::ptrdiff_t;
+        using pointer = PageProxy;
+        using reference = PageProxy;
+
+        PageIterator(BufferedFile* file, size_t pageIndex);
+
+        reference operator*();
+
+        pointer operator->();
+
+        PageIterator& operator++();
+        PageIterator operator++(int);
+        PageIterator& operator--();
+        PageIterator operator--(int);
+
+        PageIterator& operator+=(difference_type n);
+        PageIterator& operator-=(difference_type n);
+
+        friend PageIterator operator+(PageIterator it, difference_type n);
+        friend PageIterator operator+(difference_type n, PageIterator it);
+        friend PageIterator operator-(PageIterator it, difference_type n);
+        friend difference_type operator-(
+            const PageIterator& a, const PageIterator& b
+        );
+
+        reference operator[](difference_type n) const;
+
+        bool operator==(const PageIterator& other) const;
+        std::partial_ordering operator<=>(const PageIterator& other) const;
+
+        friend bool operator==(
+            const BufferedFile::PageIterator& it, const PageSentinel& s
+        );
+        friend std::ptrdiff_t operator-(
+            const BufferedFile::PageIterator& it, const PageSentinel& s
+        );
+
+       private:
+        BufferedFile* file;
+        size_t pageIndex;
+    };
+
+    class PageSentinel {
+       public:
+        using diffType = PageIterator::difference_type;
+
+        PageSentinel() = default;
+        PageSentinel(BufferedFile* file, size_t pageIndex);
+
+        friend bool operator==(
+            const BufferedFile::PageIterator& it, const PageSentinel& s
+        );
+        friend std::ptrdiff_t operator-(
+            const BufferedFile::PageIterator& it, const PageSentinel& s
+        );
+
+       private:
+        BufferedFile* file = nullptr;
+        size_t pageIndex = 0;
+    };
 
     using BufferType = std::vector<Record>;
 
@@ -81,8 +168,7 @@ class BufferedFile {
     size_t getPageCount();
     size_t getRecordCount();
 
-    PageIterator begin();
-    PageIterator end();
+    std::ranges::subrange<PageIterator, PageSentinel> pages();
 
     // Record Size in bytes
     static constexpr size_t recordSize = Record::maxLen;
@@ -114,65 +200,6 @@ class BufferedFile {
     void seekpWithExtend(
         std::ifstream::off_type offset, std::ios_base::seekdir dir
     );
-};
-
-class BufferedFile::PageProxy {
-   public:
-    friend class PageIterator;
-
-    operator std::vector<Record>() const;
-    std::vector<Record> records() const;
-    Record operator[](size_t recordIndexInPage) const;
-
-    void operator=(RangeOfRecords auto const& newPage) {
-        file->writePage(pageIndex, newPage);
-    }
-    auto operator<=>(const PageProxy& other) const = default;
-
-   private:
-    PageProxy(BufferedFile* file, size_t pageIndex);
-
-    BufferedFile* file;
-    size_t pageIndex;
-};
-
-class BufferedFile::PageIterator {
-   public:
-    using iterator_category = std::random_access_iterator_tag;
-    using value_type = PageProxy;
-    using difference_type = std::ptrdiff_t;
-    using pointer = PageProxy;
-    using reference = PageProxy;
-
-    PageIterator(BufferedFile* file, size_t pageIndex);
-
-    reference operator*();
-
-    pointer operator->();
-
-    PageIterator& operator++();
-    PageIterator operator++(int);
-    PageIterator& operator--();
-    PageIterator operator--(int);
-
-    PageIterator& operator+=(difference_type n);
-    PageIterator& operator-=(difference_type n);
-
-    friend PageIterator operator+(PageIterator it, difference_type n);
-    friend PageIterator operator+(difference_type n, PageIterator it);
-    friend PageIterator operator-(PageIterator it, difference_type n);
-    friend difference_type operator-(
-        const PageIterator& a, const PageIterator& b
-    );
-
-    reference operator[](difference_type n) const;
-
-    bool operator==(const PageIterator& other) const;
-    std::partial_ordering operator<=>(const PageIterator& other) const;
-
-   private:
-    BufferedFile* file;
-    size_t pageIndex;
 };
 
 #endif

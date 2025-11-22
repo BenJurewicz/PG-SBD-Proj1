@@ -9,6 +9,7 @@
 #include <ios>
 #include <iosfwd>
 #include <optional>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 
@@ -122,12 +123,24 @@ size_t BufferedFile::getRecordCount() {
     return std::ceil(lastFileIndex / recordSize);
 }
 
-BufferedFile::PageIterator BufferedFile::begin() {
-    return PageIterator(this, 0);
-};
-BufferedFile::PageIterator BufferedFile::end() {
-    return PageIterator(this, getPageCount());
-};
+// auto BufferedFile::pages() {
+//     auto begin = PageIterator(this, 0);
+//     auto end = PageSentinel(this, getPageCount());
+//     return std::ranges::subrange(begin, end);
+// }
+std::ranges::subrange<BufferedFile::PageIterator, BufferedFile::PageSentinel>
+BufferedFile::pages() {
+    auto begin = PageIterator(this, 0);
+    auto end = PageSentinel(this, getPageCount());
+    return std::ranges::subrange<PageIterator, PageSentinel>(begin, end);
+}
+
+// BufferedFile::PageIterator BufferedFile::begin() {
+//     return PageIterator(this, 0);
+// };
+// BufferedFile::PageIterator BufferedFile::end() {
+//     return PageIterator(this, getPageCount());
+// };
 
 size_t BufferedFile::rIndexToPageIndex(size_t index) {
     return index / recordsPerPage;
@@ -320,4 +333,23 @@ std::partial_ordering BufferedFile::PageIterator::operator<=>(
             pageIndex <=> other.pageIndex
         );
     }
+}
+
+// ============================================================================
+// PageSentinel
+// ============================================================================
+
+BufferedFile::PageSentinel::PageSentinel(BufferedFile* file, size_t pageIndex)
+    : file(file), pageIndex(pageIndex) {}
+
+bool operator==(
+    const BufferedFile::PageIterator& it, const BufferedFile::PageSentinel& s
+) {
+    return it.file == s.file && it.pageIndex == s.pageIndex;
+}
+std::ptrdiff_t operator-(
+    const BufferedFile::PageIterator& it, const BufferedFile::PageSentinel& s
+) {
+    using diff_t = BufferedFile::PageIterator::difference_type;
+    return static_cast<diff_t>(it.pageIndex) - static_cast<diff_t>(s.pageIndex);
 }
