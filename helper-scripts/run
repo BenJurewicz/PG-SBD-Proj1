@@ -12,4 +12,13 @@ echo -e "${BLUE}Output of ./out/sort_files:${WHITE}" &&
 echo -e "${ORANGE}State of the temp directory:${WHITE}" &&
 ls temp &&
 echo -e "${MAGENTA}Contents of ./temp/testFile.txt:${WHITE}" &&
-printFile temp/testFile.txt
+
+file1="temp/tempFile"
+file2="temp/testFile.txt"
+
+if [[ -f "$file1" && -f "$file2" ]]; then
+    paste -d ' | ' <(printFile temp/tempFile) <(printFile temp/testFile.txt) | column -t -s $'\t' | bat --file-name "temp/tempFile temp/testFile.txt" --paging=never
+else
+    printFile temp/testFile.txt
+fi
+
