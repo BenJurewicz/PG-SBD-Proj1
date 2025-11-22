@@ -85,6 +85,10 @@ class BufferedFile {
             const BufferedFile::PageIterator& it, const PageSentinel& s
         );
 
+        friend PageIterator::difference_type operator-(
+            const PageSentinel& s, const PageIterator& it
+        );
+
        private:
         BufferedFile* file;
         size_t pageIndex;
@@ -102,6 +106,14 @@ class BufferedFile {
         );
         friend std::ptrdiff_t operator-(
             const BufferedFile::PageIterator& it, const PageSentinel& s
+        );
+
+        friend PageIterator operator-(
+            const PageSentinel& s, PageIterator::difference_type n
+        );
+
+        friend PageIterator::difference_type operator-(
+            const PageSentinel& s, const PageIterator& it
         );
 
        private:

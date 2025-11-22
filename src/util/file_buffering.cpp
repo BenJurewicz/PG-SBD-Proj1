@@ -9,7 +9,6 @@
 #include <ios>
 #include <iosfwd>
 #include <optional>
-#include <ranges>
 #include <stdexcept>
 #include <string>
 
@@ -122,20 +121,6 @@ size_t BufferedFile::getRecordCount() {
     auto lastFileIndex = static_cast<float>(file.tellg());
     return std::ceil(lastFileIndex / recordSize);
 }
-
-// auto BufferedFile::pages() {
-//     auto begin = PageIterator(this, 0);
-//     auto end = PageSentinel(this, getPageCount());
-//     return std::ranges::subrange(begin, end);
-// }
-
-
-// BufferedFile::PageIterator BufferedFile::begin() {
-//     return PageIterator(this, 0);
-// };
-// BufferedFile::PageIterator BufferedFile::end() {
-//     return PageIterator(this, getPageCount());
-// };
 
 size_t BufferedFile::rIndexToPageIndex(size_t index) {
     return index / recordsPerPage;
@@ -349,4 +334,18 @@ std::ptrdiff_t operator-(
 ) {
     using diff_t = BufferedFile::PageIterator::difference_type;
     return static_cast<diff_t>(it.pageIndex) - static_cast<diff_t>(s.pageIndex);
+}
+
+BufferedFile::PageIterator operator-(
+    const BufferedFile::PageSentinel& s,
+    BufferedFile::PageIterator::difference_type n
+) {
+    return BufferedFile::PageIterator(s.file, s.pageIndex - n);
+}
+
+BufferedFile::PageIterator::difference_type operator-(
+    const BufferedFile::PageSentinel& s, const BufferedFile::PageIterator& it
+) {
+    using diff_t = BufferedFile::PageIterator::difference_type;
+    return static_cast<diff_t>(s.pageIndex) - static_cast<diff_t>(it.pageIndex);
 }
