@@ -16,7 +16,6 @@ class Buffer {
 
     Buffer();
 
-    // Input Buffer constructor
     Buffer(BufferedFile::PageIterator begin, BufferedFile::PageIterator end);
     Buffer(
         std::ranges::subrange<
@@ -31,20 +30,20 @@ class Buffer {
     ~Buffer();
 
    private:
-    void flush_output();
+    void flush();
 
     Type type = Type::UNINITIALIZED;
 
     // For input
-    std::optional<BufferedFile::PageIterator> it_begin;
-    std::optional<BufferedFile::PageIterator> it_current;
-    std::optional<BufferedFile::PageIterator> it_end;
-    size_t record_count = 0;
-    size_t current_page_idx = -1;
+    std::optional<BufferedFile::PageIterator> itBegin;
+    std::optional<BufferedFile::PageIterator> itCurrent;
+    std::optional<BufferedFile::PageIterator> itEnd;
+    size_t recordCount = 0;
+    size_t currentPageIndex = -1;
 
     // For output
-    std::optional<BufferedFile::PageIterator> output_iterator;
-    size_t written_records_in_page = 0;
+    std::optional<BufferedFile::PageIterator> outIter;
+    size_t writtenRecordsInPage = 0;
 
     std::vector<Record> page;
 };
