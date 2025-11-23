@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
 
     double theoryAccess = std::floor((2 * N) / (b * log(n)) * log(N / b));
 
-    double theoryPhase = log(N / b) / log(n) - 1;
+    double theoryPhase = std::ceil(log(N / b) / log(n) - 1);
 
     std::cout << "Phases Needed Actual: " << phaseCount << std::endl;
     std::cout << "Phases Needed Theory: " << theoryPhase << std::endl;
