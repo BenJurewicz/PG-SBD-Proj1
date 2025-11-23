@@ -2,13 +2,10 @@
 #include <buffer.hpp>
 #include <cstddef>
 #include <file_buffering.hpp>
-#include <functional>
 #include <iostream>
-#include <memory>
 #include <ostream>
 #include <queue>
 #include <ranges>
-#include <string>
 #include <vector>
 
 // TODO: make this into options later
@@ -22,14 +19,13 @@ int main() {
 
     // Buffer bf(f, 1, 1);
 
-    // size_t maxi = 100;
-    // for (size_t i = 0; i < maxi; i++) {
-    //     f.write(i, std::to_string(maxi - 1 - i));
-    // }
-    // f.flush();
+    size_t maxi = 100;
+    for (size_t i = 0; i < maxi; i++) {
+        f.write(i, std::to_string(maxi - 1 - i));
+    }
+    f.flush();
 
     createRunsInFile(f);
-    return 0;
 
     std::cout << "Stage 2: Merging runs" << std::endl;
 
@@ -109,7 +105,7 @@ int main() {
             buffers.back() = dstPages;
 
             // NOTE: Initialize pq with first element from each non-empty buffer
-            for (size_t i = 0; i < input_buffers_used; ++i) {
+            for (size_t i = 0; i < input_buffers_used; i++) {
                 if (!buffers[i].empty()) {
                     pq.push({i, 0});
                 }
@@ -142,6 +138,8 @@ int main() {
     return 0;
 }
 
+// void readPagesIntoBuffers(std::vector < std::vector<Record> buffers) {}
+
 void createRunsInFile(BufferedFile& f) {
     std::vector<std::vector<Record>> buffers(bufferCount);
 
@@ -150,6 +148,9 @@ void createRunsInFile(BufferedFile& f) {
     auto [fBegin, fEnd] = f.pages();
     bool isFileEmpty = false;
     size_t recordIndex = 0;
+
+    Buffer outBuf;
+    outBuf = f.pages();
 
     while (!isFileEmpty) {
         for (auto& b : buffers) {
@@ -189,7 +190,8 @@ void createRunsInFile(BufferedFile& f) {
             auto [bufIdx, elemIdx] = pq.top();
             pq.pop();
 
-            f.write(recordIndex++, buffers[bufIdx][elemIdx]);
+            // f.write(recordIndex++, buffers[bufIdx][elemIdx]);
+            outBuf.push_back(buffers[bufIdx][elemIdx]);
 
             // Add next element from same buffer
             if (elemIdx + 1 < buffers[bufIdx].size()) {
