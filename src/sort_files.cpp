@@ -12,7 +12,7 @@
 #include "util/sort_options.hpp"
 
 void createRunsInFile(BufferedFile& f, const SortOptions& options);
-void mergeRuns(BufferedFile& f, const SortOptions& options);
+void mergeRuns(BufferedFile& f, const SortOptions& options, size_t& phaseCount);
 
 int main(int argc, char** argv) {
     SortOptions options(argc, argv);
@@ -25,11 +25,13 @@ int main(int argc, char** argv) {
 
     createRunsInFile(f, options);
 
-    mergeRuns(f, options);
+    size_t phaseCount = 0;
+    mergeRuns(f, options, phaseCount);
 
     std::cout << "\nFinished" << std::endl;
     std::cout << "Write Count: " << BufferedFile::writeCount << std::endl;
     std::cout << "Read Count: " << BufferedFile::readCout << std::endl;
+    std::cout << "Phases Needed: " << phaseCount << std::endl;
     std::cout << "Sorted contents: " << std::endl;
     f.printFileContent();
     return 0;
@@ -110,7 +112,9 @@ void createRunsInFile(BufferedFile& f, const SortOptions& options) {
     }
 }
 
-void mergeRuns(BufferedFile& f, const SortOptions& options) {
+void mergeRuns(
+    BufferedFile& f, const SortOptions& options, size_t& phaseCount
+) {
     if (options.isLogging()) {
         std::cout << "Stage 2: Merging runs\n" << std::endl;
     }
@@ -132,16 +136,15 @@ void mergeRuns(BufferedFile& f, const SortOptions& options) {
         decltype(cmp)>
         pq(cmp);
 
-    size_t mergeCount = 0;
-
     // NOTE: Do until one run remains
     while (runLenInPages < totalPageCount) {
         auto srcPages = src->pages();
         auto dstPages = dest->pages();
         size_t readPages = 0;
+        phaseCount++;
 
         if (options.isLogging()) {
-            std::cout << "Merge " << mergeCount++ << std::endl;
+            std::cout << "Phase " << phaseCount << std::endl;
             std::cout << "Merging " << options.getBufferCount() - 1
                       << " runs of lenght "
                       << runLenInPages * BufferedFile::recordsPerPage
