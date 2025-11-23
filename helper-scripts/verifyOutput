@@ -1,6 +1,5 @@
 #!/bin/bash
 
-INPUT_FILE=""
 TEMP_FILE=$(mktemp)
 trap 'rm -f "$TEMP_FILE"' EXIT
 
@@ -10,19 +9,18 @@ if [ -t 0 ]; then
         echo -e "\e[1;31mError:\e[0m Please provide a file name as an argument or pipe content to the script." >&2
         exit 1
     fi
-    INPUT_FILE="$1"
+    printFile "$1" >"$TEMP_FILE"
 else
     # If stdin is a pipe, redirect its content into the temporary file.
     cat >"$TEMP_FILE"
-    INPUT_FILE="$TEMP_FILE"
 fi
 
 WIDTH=$(tput cols || echo 80)
 SEPARATOR=$(printf '%*s' "$WIDTH" '' | tr ' ' '─')
 
-if LC_ALL=C sort -C "$INPUT_FILE" &>/dev/null; then
-    printf "\e[1;32m✅ File is sorted correctly.\e[0m\n"
-    printf -- "%s\n" "$SEPARATOR"
+if LC_ALL=C sort -C "$TEMP_FILE" &>/dev/null; then
+    # printf "\e[1;32mFile is sorted correctly.\e[0m\n"
+    # printf -- "%s\n" "$SEPARATOR"
     # Print all lines in green.
     perl -e '
         my $green = "\033[32m";
@@ -31,21 +29,21 @@ if LC_ALL=C sort -C "$INPUT_FILE" &>/dev/null; then
             chomp($line);
             print $green . $line . $reset . "\n";
         }
-    ' "$INPUT_FILE"
+    ' "$TEMP_FILE"
 else
-    printf "\e[1;31m❌ File is NOT sorted correctly. Coloring runs of sorted lines:\e[0m\n"
-    printf -- "%s\n" "$SEPARATOR"
+    # printf "\e[1;31mFile is NOT sorted correctly. Coloring runs of sorted lines:\e[0m\n"
+    # printf -- "%s\n" "$SEPARATOR"
     # Colore code all runs
     perl -e '
-        my @colors = ("\033[31m", "\033[33m", "\033[34m", "\033[35m", "\033[36m");
-        my $reset = "\033[0m";
-        my $run_index = 0;
-        my $prev_sanitized = "";
+        @colors = ("\033[31m", "\033[33m", "\033[34m", "\033[35m", "\033[36m");
+        $reset = "\033[0m";
+        $run_index = 0;
+        $prev_sanitized = "";
 
         while (my $line = <>) {
             chomp($line);
             my $sanitized = $line;
-            $sanitized =~ s/^[ \t]+|[ \t]+$//g;
+            $sanitized =~ s/(^[ \t]+)|([ \t]+$)//g;
 
             # On lines after the first, perform explicit string comparison (lt).
             if ($. > 1 && $sanitized lt $prev_sanitized) {
@@ -55,5 +53,5 @@ else
             print $colors[$run_index] . $line . $reset . "\n";
             $prev_sanitized = $sanitized;
         }
-    ' "$INPUT_FILE"
+    ' "$TEMP_FILE"
 fi

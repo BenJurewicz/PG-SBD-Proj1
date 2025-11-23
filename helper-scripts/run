@@ -1,25 +1,28 @@
 #!/bin/bash
 
+set -e # Exit on any error
+
 BLUE='\033[0;34m'
 MAGENTA='\033[0;35m'
 ORANGE='\033[0;33m'
 WHITE='\033[0m' # No Color
 
-make clean &&
-make debug &&
-echo -e "${BLUE}Output of ./out/sort_files:${WHITE}" &&
-./out/sort_files &&
-echo -e "${ORANGE}State of the temp directory:${WHITE}" &&
-ls temp &&
-echo -e "${MAGENTA}Contents of ./temp/testFile.txt:${WHITE}" &&
 file1="temp/tempFile"
 file2="temp/testFile.txt"
 
+make clean
+make debug
+echo -e "\n${BLUE}Output of ./out/sort_files:${WHITE}"
+./out/sort_files
+echo -e "\n${ORANGE}State of the temp directory:${WHITE}"
+ls temp
+echo -e "\n${MAGENTA}Contents of $file1 $file2:${WHITE}"
+
 if [[ -f "$file1" && -f "$file2" ]]; then
-    paste -d '|' <(printFile "$file1") <(printFile "$file2") |
+    paste -d '|' <(verifyOutput "$file1") <(verifyOutput "$file2") |
         sed 's/|/!│  /g' |
         column -t -s '!' |
         bat --file-name "$file1 $file2" --paging=never
 else
-    printFile temp/testFile.txt
+    verifyOutput temp/testFile.txt
 fi
