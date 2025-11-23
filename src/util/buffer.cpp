@@ -47,17 +47,17 @@ Record Buffer::operator[](size_t index) {
         throw std::logic_error("operator[] called on non-input buffer");
     }
 
-    size_t page_to_load = index / BufferedFile::recordsPerPage;
-    size_t idx_in_page = index % BufferedFile::recordsPerPage;
+    size_t pageToLoad = index / BufferedFile::recordsPerPage;
+    size_t indexInPage = index % BufferedFile::recordsPerPage;
 
-    if (page_to_load != currentPageIndex) {
+    if (pageToLoad != currentPageIndex) {
         itCurrent = *itBegin;
-        std::advance(*itCurrent, page_to_load);
+        std::advance(*itCurrent, pageToLoad);
         page = **itCurrent;
-        currentPageIndex = page_to_load;
+        currentPageIndex = pageToLoad;
     }
 
-    return page[idx_in_page];
+    return page[indexInPage];
 }
 
 void Buffer::append(const Record& r) {
