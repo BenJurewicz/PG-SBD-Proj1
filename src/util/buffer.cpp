@@ -1,5 +1,8 @@
 #include "buffer.hpp"
 
+#include <stdexcept>
+
+#include "error.hpp"
 #include "file_buffering.hpp"
 
 Buffer::Buffer() : mode(Mode::UNINITIALIZED) {}
@@ -37,7 +40,10 @@ bool Buffer::empty() const {
 
 Record Buffer::operator[](size_t index) {
     if (mode != Mode::INPUT || !itBegin.has_value()) {
-        throw std::logic_error("operator[] called on non-input buffer");
+        THROW_FORMATTED(
+            std::logic_error,
+            "operator[] called on non input buffer"
+        );
     }
 
     size_t pageToLoad = index / BufferedFile::recordsPerPage;
@@ -55,7 +61,10 @@ Record Buffer::operator[](size_t index) {
 
 void Buffer::append(const Record& r) {
     if (mode != Mode::OUTPUT) {
-        throw std::logic_error("push_back called on non-output buffer");
+        THROW_FORMATTED(
+            std::logic_error,
+            "push_back called on non-output buffer"
+        );
     }
 
     page.push_back(r);
