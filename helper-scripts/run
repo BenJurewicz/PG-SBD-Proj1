@@ -13,7 +13,7 @@ file2="temp/testFile.txt"
 make clean
 make debug
 echo -e "\n${BLUE}Output of ./out/sort_files:${WHITE}"
-./out/sort_files
+./out/sort_files "temp/testFile.txt"
 echo -e "\n${ORANGE}State of the temp directory:${WHITE}"
 ls temp
 echo -e "\n${MAGENTA}Contents of $file1 $file2:${WHITE}"

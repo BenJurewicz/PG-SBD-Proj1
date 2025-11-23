@@ -36,8 +36,8 @@ class SortOptions {
     void printHelpAndExit(int exitCode = 1) const;
 
     size_t bufferCount = 5;
-    size_t blockingFactor = 20;
-    bool logging = false;
+    size_t blockingFactor = 10;
+    bool logging = true;
     std::string fileName;
     std::string scriptName;
 };

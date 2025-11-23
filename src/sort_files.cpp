@@ -14,6 +14,7 @@ void createRunsInFile(BufferedFile& f, const SortOptions& options);
 
 int main(int argc, char** argv) {
     SortOptions options(argc, argv);
+    BufferedFile::setRecordsPerPage(options.getBlockingFactor());
 
     BufferedFile f(options.getFileName());
 
@@ -123,7 +124,6 @@ int main(int argc, char** argv) {
                 }
             }
             if (options.isLogging()) {
-                
                 std::cout << "After Merge: readPages = " << readPages
                           << std::endl;
             }

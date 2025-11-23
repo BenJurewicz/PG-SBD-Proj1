@@ -8,6 +8,7 @@
 #include <fstream>
 #include <ios>
 #include <iosfwd>
+#include <mutex>
 #include <record.hpp>
 #include <utility>
 #include <vector>
@@ -20,12 +21,14 @@ class BufferedFile {
    public:
     // Record Size in bytes
     static constexpr size_t recordSize = Record::maxLen;
-    static constexpr size_t recordsPerPage = 10;
+    static size_t recordsPerPage;
     // Page size in bytes
-    static constexpr size_t pageSize = recordsPerPage * recordSize;
+    static size_t pageSize;
 
     static size_t readCout;
     static size_t writeCount;
+
+    static void setRecordsPerPage(size_t recordsPerPage);
 
     class PageProxy;
     class PageIterator;
@@ -201,6 +204,8 @@ class BufferedFile {
     }
 
    private:
+    static std::once_flag setRecordsPerPageFlag;
+
     std::fstream file;
     std::vector<Record> page;
     size_t currentPageIndex = -1;

@@ -50,7 +50,7 @@ void SortOptions::handleFlag(
     } else if ((flag == "-b") || (flag == "--blockingFactor")) {
         parseBlockingFactor(i, argc, argv);
     } else if ((flag == "-l") || (flag == "--logging")) {
-        logging = true;
+        logging = false;
     } else {
         std::cerr << "Error: Unknown argument '" << flag << "'\n";
         printHelpAndExit();
@@ -103,8 +103,8 @@ void SortOptions::printHelpAndExit(int exitCode) const {
            "Options:\n"
            "\t-h, --help\tShow this help message\n"
            "\t-n, --bufferCount <value>\tSet buffer count (default: 5)\n"
-           "\t-b, --blockingFactor <value>\tSet blocking factor (default: 20)\n"
-           "\t-l, --logging\tEnable logging\n"
+           "\t-b, --blockingFactor <value>\tSet blocking factor (default: 10)\n"
+           "\t-l, --logging\tDisable logging\n"
            "Arguments:\n"
            "\t<fileName>\tRequired: Path to the file to be sorted\n";
     // clang-format on

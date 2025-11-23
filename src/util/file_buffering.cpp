@@ -8,6 +8,7 @@
 #include <fstream>
 #include <ios>
 #include <iosfwd>
+#include <mutex>
 #include <stdexcept>
 #include <string>
 
@@ -19,6 +20,17 @@
 
 size_t BufferedFile::readCout = 0;
 size_t BufferedFile::writeCount = 0;
+
+size_t BufferedFile::recordsPerPage = 0;
+size_t BufferedFile::pageSize = 0;
+std::once_flag BufferedFile::setRecordsPerPageFlag;
+
+void BufferedFile::setRecordsPerPage(size_t recordsPerPage) {
+    std::call_once(setRecordsPerPageFlag, [&]() {
+        BufferedFile::recordsPerPage = recordsPerPage;
+        BufferedFile::pageSize = recordsPerPage * recordSize;
+    });
+}
 
 BufferedFile::BufferedFile(const std::string fileName)
     : file(fileName, std::ios::in | std::ios::out) {
