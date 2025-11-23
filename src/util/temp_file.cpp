@@ -16,3 +16,5 @@ TempFile::TempFile() : filePath(generate_path()), file(filePath) {}
 TempFile::~TempFile() { std::filesystem::remove(filePath); }
 
 TempFile::operator BufferedFile&() { return file; }
+
+std::string TempFile::getFileName() { return filePath; }

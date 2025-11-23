@@ -9,6 +9,7 @@ class TempFile {
     ~TempFile();
 
     operator BufferedFile&();
+    std::string getFileName();
 
    private:
     static size_t counter;
