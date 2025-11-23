@@ -8,7 +8,6 @@
 #include <fstream>
 #include <ios>
 #include <iosfwd>
-#include <optional>
 #include <stdexcept>
 #include <string>
 

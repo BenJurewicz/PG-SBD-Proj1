@@ -8,7 +8,6 @@
 #include <fstream>
 #include <ios>
 #include <iosfwd>
-#include <optional>
 #include <record.hpp>
 #include <utility>
 #include <vector>
