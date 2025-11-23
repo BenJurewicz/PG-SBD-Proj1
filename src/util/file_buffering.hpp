@@ -197,6 +197,10 @@ class BufferedFile {
     size_t getPageCount();
     size_t getRecordCount();
 
+    // This is just a debug function so it does not change the readCount or
+    // writeCount
+    void printFileContent();
+
     auto pages() {
         auto begin = PageIterator(this, 0);
         auto end = PageSentinel(this, getPageCount());

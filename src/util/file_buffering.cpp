@@ -8,6 +8,7 @@
 #include <fstream>
 #include <ios>
 #include <iosfwd>
+#include <iostream>
 #include <mutex>
 #include <stdexcept>
 #include <string>
@@ -148,6 +149,19 @@ size_t BufferedFile::getRecordCount() {
     file.seekg(0, std::ios::end);
     auto lastFileIndex = static_cast<float>(file.tellg());
     return std::ceil(lastFileIndex / recordSize);
+}
+
+void BufferedFile::printFileContent() {
+    file.seekg(0);
+
+    std::string emptyStr(recordSize, '\0');
+    std::string currentStr = emptyStr;
+    size_t i = 0;
+    while (file.read(currentStr.data(), Record::maxLen)) {
+        std::cout << i++ << ". " << currentStr << std::endl;
+        currentStr = emptyStr;
+    }
+    file.clear();
 }
 
 size_t BufferedFile::rIndexToPageIndex(size_t index) {
