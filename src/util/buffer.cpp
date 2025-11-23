@@ -26,25 +26,13 @@ Buffer::Buffer(BufferedFile::PageIterator begin, BufferedFile::PageIterator end)
     }
 }
 
-Buffer& Buffer::operator=(
+Buffer::Buffer(
     std::ranges::subrange<
         BufferedFile::PageIterator, BufferedFile::PageSentinel>
         range
-) {
-    type = Type::OUTPUT;
-    output_iterator = range.begin();
-    page.clear();
+)
+    : type(Type::OUTPUT), output_iterator(range.begin()) {
     page.reserve(BufferedFile::recordsPerPage);
-    written_records_in_page = 0;
-
-    // Reset input buffer state
-    it_begin.reset();
-    it_current.reset();
-    it_end.reset();
-    record_count = 0;
-    current_page_idx = -1;
-
-    return *this;
 }
 
 bool Buffer::empty() const {
@@ -90,19 +78,6 @@ size_t Buffer::size() const {
         return record_count;
     }
     return 0;
-}
-
-void Buffer::clear() {
-    flush_output();
-    type = Type::UNINITIALIZED;
-    page.clear();
-    record_count = 0;
-    current_page_idx = -1;
-    written_records_in_page = 0;
-    it_begin.reset();
-    it_current.reset();
-    it_end.reset();
-    output_iterator.reset();
 }
 
 Buffer::~Buffer() { flush_output(); }

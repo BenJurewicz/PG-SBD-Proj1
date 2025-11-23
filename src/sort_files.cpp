@@ -70,7 +70,7 @@ int main() {
             std::cout << "Before Merge: readPages = " << readPages << std::endl;
 
             buffers.clear();
-            size_t input_buffers_used = 0;
+            size_t inputBuffersUsed = 0;
 
             // NOTE: Fill all input buffers
             for (size_t i = 0; i < bufferCount - 1; i++) {
@@ -78,33 +78,29 @@ int main() {
                     break;
                 }
 
-                auto run_begin = srcPages.begin();
-                auto run_end = srcPages.begin();
+                size_t pagesInThisRun =
+                    std::min(srcPages.size(), runLenInPages);
 
-                size_t pages_in_this_run = std::min(
-                    (size_t)std::ranges::distance(srcPages),
-                    runLenInPages
-                );
-                std::ranges::advance(run_end, pages_in_this_run);
+                auto runBegin = srcPages.begin();
+                auto runEnd = std::ranges::next(runBegin, pagesInThisRun);
 
-                buffers.emplace_back(run_begin, run_end);
-                input_buffers_used++;
+                buffers.emplace_back(runBegin, runEnd);
+                inputBuffersUsed++;
 
-                srcPages = std::ranges::subrange(run_end, srcPages.end());
+                srcPages = {runEnd, srcPages.end()};
             }
 
             readPages = totalPageCount - std::ranges::distance(srcPages);
 
-            if (input_buffers_used == 0) {
+            if (inputBuffersUsed == 0) {
                 break;
             }
 
             // Setup output buffer
-            buffers.emplace_back();
-            buffers.back() = dstPages;
+            buffers.emplace_back(dstPages);
 
             // NOTE: Initialize pq with first element from each non-empty buffer
-            for (size_t i = 0; i < input_buffers_used; i++) {
+            for (size_t i = 0; i < inputBuffersUsed; i++) {
                 if (!buffers[i].empty()) {
                     pq.push({i, 0});
                 }

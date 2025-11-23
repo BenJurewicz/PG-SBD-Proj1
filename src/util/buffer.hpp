@@ -18,16 +18,16 @@ class Buffer {
 
     // Input Buffer constructor
     Buffer(BufferedFile::PageIterator begin, BufferedFile::PageIterator end);
-
-    Buffer& operator=(std::ranges::subrange<
-                      BufferedFile::PageIterator, BufferedFile::PageSentinel>
-                          range);
+    Buffer(
+        std::ranges::subrange<
+            BufferedFile::PageIterator, BufferedFile::PageSentinel>
+            range
+    );
 
     bool empty() const;
     Record operator[](size_t index);
     void append(const Record& r);
     size_t size() const;
-    void clear();
     ~Buffer();
 
    private:
