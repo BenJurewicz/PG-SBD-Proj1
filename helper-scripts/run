@@ -7,13 +7,15 @@ MAGENTA='\033[0;35m'
 ORANGE='\033[0;33m'
 WHITE='\033[0m' # No Color
 
-file1="temp/tempFile"
-file2="temp/testFile.txt"
+file1="temp/testFile.txt"
+file2="temp/tempFile"
 
 make clean
 make debug
+echo -e "\n${BLUE}Output of ./out/create_files:${WHITE}"
+./out/create_files -n -r 30 -f "$file1"
 echo -e "\n${BLUE}Output of ./out/sort_files:${WHITE}"
-./out/sort_files "temp/testFile.txt"
+./out/sort_files "$file1"
 echo -e "\n${ORANGE}State of the temp directory:${WHITE}"
 ls temp
 echo -e "\n${MAGENTA}Contents of $file1 $file2:${WHITE}"
