@@ -2,10 +2,10 @@
 
 #include "file_buffering.hpp"
 
-Buffer::Buffer() : type(Type::UNINITIALIZED) {}
+Buffer::Buffer() : mode(Mode::UNINITIALIZED) {}
 
 Buffer::Buffer(BufferedFile::PageIterator begin, BufferedFile::PageIterator end)
-    : type(Type::INPUT),
+    : mode(Mode::INPUT),
       itBegin(begin),
       itCurrent(begin),
       itEnd(end),
@@ -24,19 +24,19 @@ Buffer::Buffer(
         BufferedFile::PageIterator, BufferedFile::PageSentinel>
         range
 )
-    : type(Type::OUTPUT), outIter(range.begin()) {
+    : mode(Mode::OUTPUT), outIter(range.begin()) {
     page.reserve(BufferedFile::recordsPerPage);
 }
 
 bool Buffer::empty() const {
-    if (type == Type::INPUT) {
+    if (mode == Mode::INPUT) {
         return recordCount == 0;
     }
     return true;
 }
 
 Record Buffer::operator[](size_t index) {
-    if (type != Type::INPUT || !itBegin.has_value()) {
+    if (mode != Mode::INPUT || !itBegin.has_value()) {
         throw std::logic_error("operator[] called on non-input buffer");
     }
 
@@ -54,7 +54,7 @@ Record Buffer::operator[](size_t index) {
 }
 
 void Buffer::append(const Record& r) {
-    if (type != Type::OUTPUT) {
+    if (mode != Mode::OUTPUT) {
         throw std::logic_error("push_back called on non-output buffer");
     }
 
@@ -67,7 +67,7 @@ void Buffer::append(const Record& r) {
 }
 
 size_t Buffer::size() const {
-    if (type == Type::INPUT) {
+    if (mode == Mode::INPUT) {
         return recordCount;
     }
     return 0;
@@ -76,7 +76,7 @@ size_t Buffer::size() const {
 Buffer::~Buffer() { flush(); }
 
 void Buffer::flush() {
-    if (type == Type::OUTPUT && !page.empty() && outIter.has_value()) {
+    if (mode == Mode::OUTPUT && !page.empty() && outIter.has_value()) {
         **outIter = page;
         ++(*outIter);
         page.clear();

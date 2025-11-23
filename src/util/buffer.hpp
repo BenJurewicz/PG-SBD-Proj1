@@ -12,7 +12,7 @@
 class Buffer {
    public:
     // TODO: Rename to mode
-    enum class Type { UNINITIALIZED, INPUT, OUTPUT };
+    enum class Mode { UNINITIALIZED, INPUT, OUTPUT };
 
     Buffer();
 
@@ -32,7 +32,7 @@ class Buffer {
    private:
     void flush();
 
-    Type type = Type::UNINITIALIZED;
+    Mode mode = Mode::UNINITIALIZED;
 
     // For input
     std::optional<BufferedFile::PageIterator> itBegin;
