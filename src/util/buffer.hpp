@@ -2,6 +2,8 @@
 #define BUFFER_HPP
 
 #include <cstddef>
+#include <optional>
+#include <ranges>
 #include <vector>
 #include <ranges>
 #include <optional>
@@ -11,6 +13,7 @@
 
 class Buffer {
    public:
+    // TODO: Rename to mode
     enum class Type { UNINITIALIZED, INPUT, OUTPUT };
 
     Buffer();

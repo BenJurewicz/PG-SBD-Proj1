@@ -6,13 +6,19 @@
 Buffer::Buffer() : type(Type::UNINITIALIZED) {}
 
 Buffer::Buffer(BufferedFile::PageIterator begin, BufferedFile::PageIterator end)
-    : type(Type::INPUT), it_begin(begin), it_current(begin), it_end(end), current_page_idx(0) {
+    : type(Type::INPUT),
+      it_begin(begin),
+      it_current(begin),
+      it_end(end),
+      current_page_idx(0) {
     if (it_begin.has_value() && *it_begin != *it_end) {
+        // TODO: Simplify how the records are counted
+        // check if there is some std function to get the size of a iterator
         page = **it_current;
         record_count = page.size();
         auto it = *it_begin;
         it++;
-        while(it != *it_end) {
+        while (it != *it_end) {
             record_count += std::vector<Record>(*it).size();
             it++;
         }
@@ -21,7 +27,11 @@ Buffer::Buffer(BufferedFile::PageIterator begin, BufferedFile::PageIterator end)
     }
 }
 
-Buffer& Buffer::operator=(std::ranges::subrange<BufferedFile::PageIterator, BufferedFile::PageSentinel> range) {
+Buffer& Buffer::operator=(
+    std::ranges::subrange<
+        BufferedFile::PageIterator, BufferedFile::PageSentinel>
+        range
+) {
     type = Type::OUTPUT;
     output_iterator = range.begin();
     page.clear();

@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# --- Input Handling ---
+# This script can accept input from either a file argument or from stdin (a pipe).
+
+INPUT_FILE=""
+# A temporary file is needed if we're reading from stdin.
+TEMP_FILE=$(mktemp)
+# Ensure the temporary file is removed when the script exits.
+trap 'rm -f "$TEMP_FILE"' EXIT
+
+if [ -t 0 ]; then
+    # If stdin is a terminal (not a pipe), a file argument is required.
+    if [ -z "$1" ]; then
+        echo -e "\e[1;31mError:\e[0m Please provide a file name as an argument or pipe content to the script." >&2
+        exit 1
+    fi
+    INPUT_FILE="$1"
+else
+    # If stdin is a pipe, redirect its content into the temporary file.
+    cat > "$TEMP_FILE"
+    INPUT_FILE="$TEMP_FILE"
+fi
+
+
+# Define a visual separator dynamically based on terminal width.
+# Use the $COLUMNS variable, which is more reliable inside pipes. Default to 80.
+TERM_WIDTH=${COLUMNS:-80}
+SEPARATOR=$(printf '%*s' "$TERM_WIDTH" '' | tr ' ' '─')
+
+if LC_ALL=C sort -C "$INPUT_FILE" &> /dev/null; then
+    # --- File is sorted ---
+    printf "\e[1;32m✅ File is sorted correctly.\e[0m\n"
+    printf -- "%s\n" "$SEPARATOR"
+    # Print all lines in green.
+    perl -e '
+        my $green = "\033[32m";
+        my $reset = "\033[0m";
+        while (my $line = <>) {
+            chomp($line);
+            print $green . $line . $reset . "\n";
+        }
+    ' "$INPUT_FILE"
+else
+    # --- File is not sorted ---
+    printf "\e[1;31m❌ File is NOT sorted correctly. Coloring runs of sorted lines:\e[0m\n"
+    printf -- "%s\n" "$SEPARATOR"
+    # Use Perl for robust cross-platform string comparison. It is less ambiguous
+    # about string vs. numeric context than some versions of awk.
+    perl -e '
+        my @colors = ("\033[31m", "\033[33m", "\033[34m", "\033[35m", "\033[36m");
+        my $reset = "\033[0m";
+        my $run_index = 0;
+        my $prev_sanitized = "";
+
+        while (my $line = <>) {
+            chomp($line);
+            my $sanitized = $line;
+            $sanitized =~ s/^[ \t]+|[ \t]+$//g;
+
+            # On lines after the first, perform explicit string comparison (lt).
+            if ($. > 1 && $sanitized lt $prev_sanitized) {
+                $run_index = ($run_index + 1) % @colors;
+            }
+
+            print $colors[$run_index] . $line . $reset . "\n";
+            $prev_sanitized = $sanitized;
+        }
+    ' "$INPUT_FILE"
+fi
