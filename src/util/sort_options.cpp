@@ -103,7 +103,7 @@ void SortOptions::printHelpAndExit(int exitCode) const {
         "Options:\n"
         "\t-h, --help\tShow this help message\n\n"
         "\t-n, --bufferCount <value>\n"
-        "\t\tSet buffer count (min: 2, default: 5)\n\n"
+        "\t\tSet buffer count (min: 3, default: 5)\n\n"
         "\t-b, --blockingFactor <value>\n"
         "\t\tSet blocking factor (min: 1, default: 10)\n\n"
         "\t-l, --logging\tDisable logging\n\n"
