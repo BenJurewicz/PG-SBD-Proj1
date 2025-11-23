@@ -77,6 +77,10 @@ void writeLine(std::ofstream& file, const std::string& data) {
 }
 
 void saveFile(std::vector<std::string>& lines, const std::string& filename) {
+    std::filesystem::path p = filename;
+    std::filesystem::path dir = p.parent_path();
+    std::filesystem::create_directories(dir);
+
     std::ofstream outfile(filename, std::ios::out | std::ios::binary);
     if (outfile.is_open()) {
         for (const auto& line : lines) {
