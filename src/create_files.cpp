@@ -55,7 +55,6 @@ void manualMode(std::vector<std::string>& lines) {
                     Record::maxLen
                 ) << std::endl;
             // clang-format on
-            break;
         }
 
         lines.push_back(line);
