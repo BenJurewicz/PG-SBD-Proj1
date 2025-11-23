@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <buffer.hpp>
+#include <cmath>
 #include <cstddef>
 #include <file_buffering.hpp>
 #include <iostream>
@@ -32,6 +33,16 @@ int main(int argc, char** argv) {
     std::cout << "Write Count: " << BufferedFile::writeCount << std::endl;
     std::cout << "Read Count: " << BufferedFile::readCout << std::endl;
     std::cout << "Phases Needed: " << phaseCount << std::endl;
+
+    auto N = static_cast<double>(f.getRecordCount());
+    auto b = static_cast<double>(options.getBlockingFactor());
+    auto n = static_cast<double>(options.getBufferCount());
+
+    double theory = (2 * N) / (b * log(n)) * log(N / b);
+
+    std::cout << "Disk accesses in practice: "
+              << BufferedFile::readCout + BufferedFile::writeCount << std::endl;
+    std::cout << "Disk accesses in theory:" << theory << std::endl;
     std::cout << "Sorted contents: " << std::endl;
     f.printFileContent();
     return 0;
