@@ -67,9 +67,6 @@ class BufferedFile {
 
         pointer operator->() const;
 
-        BufferedFile* get_file() const;
-        size_t get_page_index() const;
-
         PageIterator& operator++();
         PageIterator operator++(int);
         PageIterator& operator--();

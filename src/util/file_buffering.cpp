@@ -252,10 +252,6 @@ BufferedFile::PageIterator::operator->() const {
     return PageProxy(file, pageIndex);
 }
 
-BufferedFile* BufferedFile::PageIterator::get_file() const { return file; }
-
-size_t BufferedFile::PageIterator::get_page_index() const { return pageIndex; }
-
 BufferedFile::PageIterator& BufferedFile::PageIterator::operator++() {
     pageIndex++;
     return *this;
