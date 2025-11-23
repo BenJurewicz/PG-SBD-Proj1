@@ -20,9 +20,9 @@ int main(int argc, char** argv) {
     BufferedFile::setRecordsPerPage(options.getBlockingFactor());
 
     BufferedFile f(options.getFileName());
-    // std::cout << "Loaded file: " << options.getFileName() << std::endl;
-    // f.printFileContent();
-    // std::cout << std::endl;
+    std::cout << "Loaded file: " << options.getFileName() << std::endl;
+    f.printFileContent();
+    std::cout << std::endl;
 
     createRunsInFile(f, options);
 
@@ -32,19 +32,22 @@ int main(int argc, char** argv) {
     std::cout << "\nFinished" << std::endl;
     std::cout << "Write Count: " << BufferedFile::writeCount << std::endl;
     std::cout << "Read Count: " << BufferedFile::readCout << std::endl;
-    std::cout << "Phases Needed: " << phaseCount << std::endl;
 
     auto N = static_cast<double>(f.getRecordCount());
     auto b = static_cast<double>(options.getBlockingFactor());
     auto n = static_cast<double>(options.getBufferCount());
 
-    double theory = std::floor((2 * N) / (b * log(n)) * log(N / b));
+    double theoryAccess = std::floor((2 * N) / (b * log(n)) * log(N / b));
 
+    double theoryPhase = log(N / b) / log(n) - 1;
+
+    std::cout << "Phases Needed Actual: " << phaseCount << std::endl;
+    std::cout << "Phases Needed Theory: " << theoryPhase << std::endl;
     std::cout << "Disk accesses in practice: "
               << BufferedFile::readCout + BufferedFile::writeCount << std::endl;
-    std::cout << "Disk accesses in theory:" << theory << std::endl;
-    // std::cout << "Sorted contents: " << std::endl;
-    // f.printFileContent();
+    std::cout << "Disk accesses in theory:" << theoryAccess << std::endl;
+    std::cout << "Sorted contents: " << std::endl;
+    f.printFileContent();
     return 0;
 }
 

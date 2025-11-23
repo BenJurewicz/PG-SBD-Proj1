@@ -1,0 +1,6 @@
+#/bin/bash
+for R in 500 1000 10000 100000 1000000; do
+  ( R=$R B=50 N=10; \
+    ./out/create_files -r "$R" -f "temp/t" && \
+    ./out/sort_files -b "$B" -n "$N" "temp/t" -l > "results-${R}-${B}-${N}.txt" )
+done
