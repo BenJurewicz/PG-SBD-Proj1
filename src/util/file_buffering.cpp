@@ -11,6 +11,8 @@
 #include <stdexcept>
 #include <string>
 
+#include "record.hpp"
+
 // ============================================================================
 // BufferedFile
 // ============================================================================
@@ -75,6 +77,9 @@ void BufferedFile::flush() {
 
     std::fstream::off_type offset = pIndexToOffset(currentPageIndex);
     seekpWithExtend(offset, std::ios::beg);
+
+    // Resize just in case
+    page.resize(recordsPerPage, Record::empty);
 
     for (const auto& line : page) {
         file.write(line.data().data(), line.lenght());
@@ -169,11 +174,7 @@ void BufferedFile::loadPage(size_t pageIndex) {
     file.clear();  // Clear flags in case we stumbled upon eof
 
     // Fill the page in case we run into the end of the file
-    // TODO: Use page.resize(pageSize, Record::empty); here
-    while (i < recordsPerPage) {
-        page.push_back(Record::empty);
-        i++;
-    }
+    page.resize(recordsPerPage, Record::empty);
 
     currentPageIndex = pageIndex;
     readCout++;
