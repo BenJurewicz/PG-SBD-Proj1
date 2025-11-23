@@ -106,8 +106,7 @@ int main(int argc, char** argv) {
             // Setup output buffer
             buffers.emplace_back(dstPages);
 
-            // NOTE: Initialize pq with first element from each non-empty
-            // buffer
+            // NOTE: Initialize pg with first element from each nonempty buffer
             for (size_t i = 0; i < inputBuffersUsed; i++) {
                 if (!buffers[i].empty()) {
                     pq.push({i, 0});
@@ -121,6 +120,7 @@ int main(int argc, char** argv) {
 
                 buffers.back().append(buffers[bufIdx][elemIdx]);
 
+                // Add next element from same buffer
                 if (elemIdx + 1 < buffers[bufIdx].size()) {
                     pq.push({bufIdx, elemIdx + 1});
                 }
@@ -172,6 +172,7 @@ void createRunsInFile(BufferedFile& f, const SortOptions& options) {
     size_t runCount = 0;
 
     while (!isFileEmpty) {
+        // NOTE: Fill all buffers
         for (auto& b : buffers) {
             if (fBegin == fEnd) {
                 isFileEmpty = true;
@@ -188,7 +189,7 @@ void createRunsInFile(BufferedFile& f, const SortOptions& options) {
             std::ranges::sort(b);
         }
 
-        // NOTE: Initialize with first element from each non-empty buffer
+        // NOTE: Initialize pg with first element from each nonempty buffer
         for (size_t i = 0; i < buffers.size(); i++) {
             if (!buffers[i].empty()) {
                 pq.push({i, 0});
@@ -200,7 +201,6 @@ void createRunsInFile(BufferedFile& f, const SortOptions& options) {
             auto [bufIdx, elemIdx] = pq.top();
             pq.pop();
 
-            // f.write(recordIndex++, buffers[bufIdx][elemIdx]);
             outBuf.append(buffers[bufIdx][elemIdx]);
 
             // Add next element from same buffer
