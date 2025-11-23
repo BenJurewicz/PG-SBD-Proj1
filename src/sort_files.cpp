@@ -18,12 +18,15 @@ int main(int argc, char** argv) {
     BufferedFile::setRecordsPerPage(options.getBlockingFactor());
 
     BufferedFile f(options.getFileName());
-
-    size_t maxi = 100;
-    for (size_t i = 0; i < maxi; i++) {
-        f.write(i, std::to_string(maxi - 1 - i));
+    if (options.isLogging()) {
+        std::cout << "Loaded file: " << options.getFileName() << std::endl;
     }
-    f.flush();
+
+    // size_t maxi = 100;
+    // for (size_t i = 0; i < maxi; i++) {
+    //     f.write(i, std::to_string(maxi - 1 - i));
+    // }
+    // f.flush();
 
     createRunsInFile(f, options);
 
@@ -148,6 +151,10 @@ int main(int argc, char** argv) {
 }
 
 void createRunsInFile(BufferedFile& f, const SortOptions& options) {
+    if (options.isLogging()) {
+        std::cout << "Stage 1: Divide into runs" << std::endl;
+    }
+
     std::vector<std::vector<Record>> buffers(options.getBufferCount());
 
     auto cmp = [&](auto& a, auto& b) {
@@ -159,15 +166,13 @@ void createRunsInFile(BufferedFile& f, const SortOptions& options) {
         decltype(cmp)>
         pq(cmp);
 
-    if (options.isLogging()) {
-        std::cout << "Stage 1: Divide into runs" << std::endl;
-    }
-
     auto [fBegin, fEnd] = f.pages();
     bool isFileEmpty = false;
 
     Buffer outBuf;
     outBuf = f.pages();
+
+    size_t runCount = 0;
 
     while (!isFileEmpty) {
         for (auto& b : buffers) {
@@ -209,6 +214,10 @@ void createRunsInFile(BufferedFile& f, const SortOptions& options) {
 
         for (auto& b : buffers) {
             b.clear();
+        }
+
+        if (options.isLogging()) {
+            std::cout << "Run " << ++runCount << ":" << std::endl;
         }
     }
 }
