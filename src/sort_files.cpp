@@ -8,6 +8,7 @@
 #include <ranges>
 #include <vector>
 
+#include "temp_file.hpp"
 #include "util/sort_options.hpp"
 
 void createRunsInFile(BufferedFile& f, const SortOptions& options);
@@ -32,9 +33,10 @@ int main(int argc, char** argv) {
 
     std::vector<Buffer> buffers(options.getBufferCount());
 
-    BufferedFile t("temp/tempFile");
+    // BufferedFile t("temp/tempFile");
+    TempFile t;
     BufferedFile* source = &f;
-    BufferedFile* dest = &t;
+    BufferedFile* dest = &static_cast<BufferedFile&>(t);
 
     size_t totalPageCount = f.getPageCount();
     size_t runLenInPages = options.getBufferCount();

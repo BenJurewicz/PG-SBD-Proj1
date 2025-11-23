@@ -12,6 +12,7 @@ std::string TempFile::generate_path() {
     return (dir / std::format("tempFile{}", counter++));
 }
 
-TempFile::TempFile() : file(generate_path()) {}
+TempFile::TempFile() : filePath(generate_path()), file(filePath) {}
+TempFile::~TempFile() { std::filesystem::remove(filePath); }
 
 TempFile::operator BufferedFile&() { return file; }

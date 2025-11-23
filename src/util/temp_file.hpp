@@ -6,11 +6,14 @@
 class TempFile {
    public:
     TempFile();
+    ~TempFile();
 
     operator BufferedFile&();
 
    private:
     static size_t counter;
+
+    const std::filesystem::path filePath;
     BufferedFile file;
 
     static std::string generate_path();
