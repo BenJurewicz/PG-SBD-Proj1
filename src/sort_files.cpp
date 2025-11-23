@@ -46,6 +46,7 @@ int main() {
         std::vector<std::pair<size_t, size_t>>,
         decltype(cmp)>
         pq(cmp);
+
     size_t phaseCount = 0;
 
     // NOTE: Do until one run remains
@@ -67,12 +68,13 @@ int main() {
         while (readPages < totalPageCount) {
             std::cout << "\nMerge" << std::endl;
             std::cout << "Before Merge: readPages = " << readPages << std::endl;
+
             buffers.clear();
             size_t input_buffers_used = 0;
 
             // NOTE: Fill all input buffers
             for (size_t i = 0; i < bufferCount - 1; i++) {
-                if (srcPages.begin() == srcPages.end()) {
+                if (srcPages.empty()) {
                     break;
                 }
 
@@ -139,6 +141,15 @@ int main() {
 void createRunsInFile(BufferedFile& f) {
     std::vector<std::vector<Record>> buffers(bufferCount);
 
+    auto cmp = [&](auto& a, auto& b) {
+        return buffers[a.first][a.second] > buffers[b.first][b.second];
+    };
+    std::priority_queue<
+        std::pair<size_t, size_t>,
+        std::vector<std::pair<size_t, size_t>>,
+        decltype(cmp)>
+        pq(cmp);
+
     std::cout << "Stage 1: Divide into runs" << std::endl;
 
     auto [fBegin, fEnd] = f.pages();
@@ -159,28 +170,19 @@ void createRunsInFile(BufferedFile& f) {
             break;
         }
 
-        // Sort:
+        // NOTE: Sort:
         for (auto& b : buffers) {
             std::ranges::sort(b);
         }
 
-        // K-way merge
-        auto cmp = [&](auto& a, auto& b) {
-            return buffers[a.first][a.second] > buffers[b.first][b.second];
-        };
-        std::priority_queue<
-            std::pair<size_t, size_t>,
-            std::vector<std::pair<size_t, size_t>>,
-            decltype(cmp)>
-            pq(cmp);
-
-        // Initialize with first element from each non-empty buffer
+        // NOTE: Initialize with first element from each non-empty buffer
         for (size_t i = 0; i < buffers.size(); i++) {
             if (!buffers[i].empty()) {
                 pq.push({i, 0});
             }
         }
 
+        // NOTE: K-way merge
         while (!pq.empty()) {
             auto [bufIdx, elemIdx] = pq.top();
             pq.pop();
