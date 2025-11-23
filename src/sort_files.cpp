@@ -19,11 +19,11 @@ int main() {
 
     // Buffer bf(f, 1, 1);
 
-    // size_t maxi = 100;
-    // for (size_t i = 0; i < maxi; i++) {
-    //     f.write(i, std::to_string(maxi - 1 - i));
-    // }
-    // f.flush();
+    size_t maxi = 100;
+    for (size_t i = 0; i < maxi; i++) {
+        f.write(i, std::to_string(maxi - 1 - i));
+    }
+    f.flush();
 
     createRunsInFile(f);
 
@@ -36,9 +36,7 @@ int main() {
     BufferedFile* dest = &t;
 
     size_t totalPageCount = f.getPageCount();
-    // size_t totalRecordCount = f.getRecordCount();
     size_t runLenInPages = bufferCount;
-    // size_t readPages = 0;
 
     auto cmp = [&](auto& a, auto& b) {
         return buffers[a.first][a.second] > buffers[b.first][b.second];
@@ -56,7 +54,7 @@ int main() {
         auto dstPages = dest->pages();
         size_t readPages = 0;
 
-        std::cout << "One Phase Iteration" << std::endl;
+        std::cout << "\nPhase Iteration" << std::endl;
         std::cout << "phaseCount = " << phaseCount << std::endl;
         std::cout << "dest = "
                   << (dest == &f ? "temp/testFile.txt" : "temp/tempFile")
@@ -67,9 +65,8 @@ int main() {
 
         // NOTE: Do one merge pass
         while (readPages < totalPageCount) {
-            std::cout << "One Merge" << std::endl;
-            std::cout << "readPages = " << readPages << std::endl;
-            std::cout << "readPages = " << readPages << std::endl;
+            std::cout << "\nMerge" << std::endl;
+            std::cout << "Before Merge: readPages = " << readPages << std::endl;
             buffers.clear();
             size_t input_buffers_used = 0;
 
@@ -116,12 +113,13 @@ int main() {
                 auto [bufIdx, elemIdx] = pq.top();
                 pq.pop();
 
-                buffers.back().push_back(buffers[bufIdx][elemIdx]);
+                buffers.back().append(buffers[bufIdx][elemIdx]);
 
                 if (elemIdx + 1 < buffers[bufIdx].size()) {
                     pq.push({bufIdx, elemIdx + 1});
                 }
             }
+            std::cout << "After Merge: readPages = " << readPages << std::endl;
         }
 
         runLenInPages *= (bufferCount - 1);
@@ -132,15 +130,11 @@ int main() {
         phaseCount++;
     }
 
-    std::cout << "Finished" << std::endl;
+    std::cout << "\nFinished" << std::endl;
     std::cout << "Write Count: " << BufferedFile::writeCount << std::endl;
     std::cout << "Read Count: " << BufferedFile::readCout << std::endl;
     return 0;
 }
-
-// void readPagesIntoBuffers(std::vector < std::vector<Record> buffers) {}
-
-// void KWayMerge(std::vector<Buffer> inputBuffers, )
 
 void createRunsInFile(BufferedFile& f) {
     std::vector<std::vector<Record>> buffers(bufferCount);
@@ -149,7 +143,6 @@ void createRunsInFile(BufferedFile& f) {
 
     auto [fBegin, fEnd] = f.pages();
     bool isFileEmpty = false;
-    size_t recordIndex = 0;
 
     Buffer outBuf;
     outBuf = f.pages();
@@ -193,7 +186,7 @@ void createRunsInFile(BufferedFile& f) {
             pq.pop();
 
             // f.write(recordIndex++, buffers[bufIdx][elemIdx]);
-            outBuf.push_back(buffers[bufIdx][elemIdx]);
+            outBuf.append(buffers[bufIdx][elemIdx]);
 
             // Add next element from same buffer
             if (elemIdx + 1 < buffers[bufIdx].size()) {

@@ -5,8 +5,6 @@
 #include <optional>
 #include <ranges>
 #include <vector>
-#include <ranges>
-#include <optional>
 
 #include "file_buffering.hpp"
 #include "record.hpp"
@@ -22,12 +20,12 @@ class Buffer {
     Buffer(BufferedFile::PageIterator begin, BufferedFile::PageIterator end);
 
     Buffer& operator=(std::ranges::subrange<
-                     BufferedFile::PageIterator, BufferedFile::PageSentinel>
-                         range);
+                      BufferedFile::PageIterator, BufferedFile::PageSentinel>
+                          range);
 
     bool empty() const;
     Record operator[](size_t index);
-    void push_back(const Record& r);
+    void append(const Record& r);
     size_t size() const;
     void clear();
     ~Buffer();

@@ -1,6 +1,5 @@
 #include "buffer.hpp"
 
-#include <numeric>
 #include "file_buffering.hpp"
 
 Buffer::Buffer() : type(Type::UNINITIALIZED) {}
@@ -37,7 +36,7 @@ Buffer& Buffer::operator=(
     page.clear();
     page.reserve(BufferedFile::recordsPerPage);
     written_records_in_page = 0;
-    
+
     // Reset input buffer state
     it_begin.reset();
     it_current.reset();
@@ -73,7 +72,7 @@ Record Buffer::operator[](size_t index) {
     return page[idx_in_page];
 }
 
-void Buffer::push_back(const Record& r) {
+void Buffer::append(const Record& r) {
     if (type != Type::OUTPUT) {
         throw std::logic_error("push_back called on non-output buffer");
     }
@@ -106,9 +105,7 @@ void Buffer::clear() {
     output_iterator.reset();
 }
 
-Buffer::~Buffer() {
-    flush_output();
-}
+Buffer::~Buffer() { flush_output(); }
 
 void Buffer::flush_output() {
     if (type == Type::OUTPUT && !page.empty() && output_iterator.has_value()) {
