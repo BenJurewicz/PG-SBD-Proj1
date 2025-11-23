@@ -177,6 +177,22 @@ void BufferedFile::printFileContent() {
     file.clear();
 }
 
+void BufferedFile::copyFrom(BufferedFile& bf) {
+    this->flush();
+    bf.flush();
+
+    bf.file.clear();
+    bf.file.seekg(0, std::ios::beg);
+
+    this->file.clear();
+    this->file.seekp(0, std::ios::beg);
+
+    this->file << bf.file.rdbuf();
+    this->file.flush();
+
+    this->file.clear();
+}
+
 size_t BufferedFile::rIndexToPageIndex(size_t index) {
     return index / recordsPerPage;
 }

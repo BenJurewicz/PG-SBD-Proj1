@@ -18,13 +18,14 @@ echo -e "\n${BLUE}Output of ./out/sort_files:${WHITE}"
 ./out/sort_files -n 5 -b 3 "$file1"
 echo -e "\n${ORANGE}State of the temp directory:${WHITE}"
 ls temp
-echo -e "\n${MAGENTA}Contents of $file1 $file2:${WHITE}"
+echo -e "\n${MAGENTA}Contents of $file1:${WHITE}"
+verifyOutput "$file1"
 
-if [[ -f "$file1" && -f "$file2" ]]; then
-    paste -d '|' <(verifyOutput "$file1") <(verifyOutput "$file2") |
-        sed 's/|/!│  /g' |
-        column -t -s '!' |
-        bat --file-name "$file1 $file2" --paging=never
-else
-    verifyOutput temp/testFile.txt
-fi
+# if [[ -f "$file1" && -f "$file2" ]]; then
+#     paste -d '|' <(verifyOutput "$file1") <(verifyOutput "$file2") |
+#         sed 's/|/!│  /g' |
+#         column -t -s '!' |
+#         bat --file-name "$file1 $file2" --paging=never
+# else
+#     verifyOutput temp/testFile.txt
+# fi

@@ -219,4 +219,10 @@ void mergeRuns(BufferedFile& f, const SortOptions& options) {
         dest = src;
         src = temp;
     }
+
+    // This is a little bit counterintuitive, as we want to copy the contents of
+    // the last written destination to the source, thus: src->copyFrom(*dest)
+    // We actually need to do the reverse as we switch dest and src right before
+    // exiting the loop
+    dest->copyFrom(*src);
 }

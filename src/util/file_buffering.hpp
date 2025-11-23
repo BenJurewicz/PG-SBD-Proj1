@@ -200,6 +200,7 @@ class BufferedFile {
     // This is just a debug function so it does not change the readCount or
     // writeCount
     void printFileContent();
+    void copyFrom(BufferedFile& file);
 
     auto pages() {
         auto begin = PageIterator(this, 0);
