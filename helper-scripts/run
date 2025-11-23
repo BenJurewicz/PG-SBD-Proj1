@@ -13,7 +13,7 @@ file2="temp/tempFile"
 make clean
 make debug
 echo -e "\n${BLUE}Output of ./out/create_files:${WHITE}"
-./out/create_files -n -r 30 -f "$file1"
+./out/create_files -n -r 37 -f "$file1"
 echo -e "\n${BLUE}Output of ./out/sort_files:${WHITE}"
 ./out/sort_files -n 5 -b 3 "$file1"
 echo -e "\n${ORANGE}State of the temp directory:${WHITE}"
