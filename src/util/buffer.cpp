@@ -10,17 +10,10 @@ Buffer::Buffer(BufferedFile::PageIterator begin, BufferedFile::PageIterator end)
       itCurrent(begin),
       itEnd(end),
       currentPageIndex(0) {
-    if (itBegin.has_value() && *itBegin != *itEnd) {
-        // TODO: Simplify how the records are counted
-        // check if there is some std function to get the size of a iterator
+    if (*itBegin != *itEnd) {
         page = **itCurrent;
-        recordCount = page.size();
-        auto it = *itBegin;
-        it++;
-        while (it != *itEnd) {
-            recordCount += std::vector<Record>(*it).size();
-            it++;
-        }
+        size_t pageCount = *itEnd - *itBegin;
+        recordCount = pageCount * BufferedFile::recordsPerPage;
     } else {
         recordCount = 0;
     }
