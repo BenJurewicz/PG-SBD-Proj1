@@ -92,9 +92,7 @@ bool BufferedFile::isCurrentPageEmpty() {
     });
 }
 
-std::optional<BufferedFile::BufferType> BufferedFile::readPage(
-    size_t pageIndex
-) {
+BufferedFile::BufferType BufferedFile::readPage(size_t pageIndex) {
     if (pageIndex >= getPageCount()) {
         THROW_FORMATTED(
             std::out_of_range,
@@ -104,11 +102,13 @@ std::optional<BufferedFile::BufferType> BufferedFile::readPage(
         );
     }
     loadPage(pageIndex);
-    return isCurrentPageEmpty() ? std::nullopt : std::optional(page);
+    return page;
 }
 
-std::optional<BufferedFile::BufferType> BufferedFile::readPage() {
-    return readPage(currentPageIndex);
+BufferedFile::BufferType BufferedFile::readPage() {
+    auto temp = readPage(currentPageIndex);
+    loadPage(currentPageIndex + 1);
+    return temp;
 }
 
 void BufferedFile::resetPageIndex() { loadPage(0); }
@@ -218,10 +218,7 @@ BufferedFile::PageProxy::operator std::vector<Record>() const {
 
 std::vector<Record> BufferedFile::PageProxy::records() const {
     auto pageOpt = file->readPage(pageIndex);
-    if (pageOpt) {
-        return *pageOpt;
-    }
-    return {};
+    return pageOpt;
 }
 
 Record BufferedFile::PageProxy::operator[](size_t recordIndexInPage) const {

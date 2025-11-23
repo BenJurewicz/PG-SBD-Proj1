@@ -149,12 +149,13 @@ class BufferedFile {
     // Checks if the current page is empty
     bool isCurrentPageEmpty();
     // Returns the page with a given index if it exists
-    std::optional<BufferType> readPage(size_t pageIndex);
+    BufferType readPage(size_t pageIndex);
     // Returns the current page and increments the page index
-    std::optional<BufferType> readPage();
+    BufferType readPage();
     // Completly overwrites the current page and increments the page index
     void writePage(RangeOfRecords auto const& page) {
         writePage(currentPageIndex, page);
+        loadPage(currentPageIndex + 1);
     }
 
     void writePage(size_t pageIndex, RangeOfRecords auto const& newPage) {
