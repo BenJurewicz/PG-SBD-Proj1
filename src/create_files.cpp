@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "util/create_options.hpp"
+
 std::default_random_engine rng{std::random_device{}()};
 
 std::string generate_random_string(int maxLength, bool numOnly = false) {
@@ -29,12 +31,14 @@ std::string generate_random_string(int maxLength, bool numOnly = false) {
 
 void manual_mode(std::vector<std::string>& lines) {
     std::string line;
-    std::cout << std::format(
-                     "Enter lines of text (up to {} characters). Type '!q' to "
-                     "finish.",
-                     Record::maxLen
-                 )
-              << std::endl;
+    // clang-format off
+    std::cout << 
+        std::format(
+            "Enter lines of text (up to {} characters)."
+            " Type '!q' to finish.",
+            Record::maxLen
+        ) << std::endl;
+    // clang-format on
 
     while (true) {
         std::getline(std::cin, line);
@@ -44,12 +48,14 @@ void manual_mode(std::vector<std::string>& lines) {
         }
 
         if (line.length() > Record::maxLen) {
-            std::cout
-                << std::format(
-                       "Error: String exceeds {} characters. Please try again.",
-                       Record::maxLen
-                   )
-                << std::endl;
+            // clang-format off
+            std::cout << 
+                std::format(
+                    "Error: String exceeds {} characters. "
+                    "Please try again.",
+                    Record::maxLen
+                ) << std::endl;
+            // clang-format on
             break;
         }
 
@@ -57,84 +63,46 @@ void manual_mode(std::vector<std::string>& lines) {
     }
 }
 
-void auto_mode(std::vector<std::string>& lines, bool numOnly = false) {
-    int num_strings;
-    std::cout << "Enter the number of strings to generate: ";
-    std::cin >> num_strings;
-    std::cin.ignore();
-
-    for (int i = 0; i < num_strings; ++i) {
+void auto_mode(
+    std::vector<std::string>& lines, size_t num_strings, bool numOnly = false
+) {
+    for (size_t i = 0; i < num_strings; ++i) {
         lines.push_back(generate_random_string(Record::maxLen, numOnly));
     }
     std::cout << num_strings << " random strings generated." << std::endl;
 }
 
 void write_line(std::ofstream& file, const std::string& data) {
-    auto tempStr = data;
-    tempStr.resize(Record::maxLen);
-    std::string nulls('\0', Record::maxLen - data.length());
-    file << tempStr << nulls;
+    std::string tempStr = data;
+    tempStr.resize(Record::maxLen, '\0');
+    file.write(tempStr.data(), Record::maxLen);
 }
 
-void save_file(std::vector<std::string>& lines) {
-    std::string filename;
-    std::cout
-        << "Enter filename to save to (if empty defaults to \"data.txt\"): ";
-    std::getline(std::cin, filename);
-    if (filename.empty()) {
-        filename = "data.txt";
-    }
-    filename = "data/" + filename;
-
-    std::ofstream outfile(filename);
+void save_file(std::vector<std::string>& lines, const std::string& filename) {
+    std::ofstream outfile(filename, std::ios::out | std::ios::binary);
     if (outfile.is_open()) {
         for (const auto& line : lines) {
             write_line(outfile, line);
         }
-        outfile.close();
         std::cout << "Data saved to " << filename << std::endl;
     } else {
         std::cerr << "Error: Could not open file for writing." << std::endl;
     }
 }
 
-int get_user_choice() {
-    int choice;
-    std::cout << "\nChoose an option:" << std::endl;
-    std::cout << "1. Manual input" << std::endl;
-    std::cout << "2. Automatic generation (all printable characters)"
-              << std::endl;
-    std::cout << "3. Automatic generation (numbers only)" << std::endl;
-    std::cout << "4. Save and quit" << std::endl;
-    std::cout << "Enter your choice: ";
-    std::cin >> choice;
-    std::cin.ignore();
-    return choice;
-}
-
-int main() {
+int main(int argc, char** argv) {
+    CreateOptions options(argc, argv);
     std::vector<std::string> lines;
-    int choice;
 
-    do {
-        choice = get_user_choice();
-        switch (choice) {
-            case 1:
-                manual_mode(lines);
-                break;
-            case 2:
-                auto_mode(lines);
-                break;
-            case 3:
-                auto_mode(lines, true);
-                break;
-            case 4:
-                save_file(lines);
-                break;
-            default:
-                std::cout << "Invalid choice. Please try again." << std::endl;
-        }
-    } while (choice != 4);
+    if (options.isInteractiveMode()) {
+        manual_mode(lines);
+    } else if (options.isRandomMode()) {
+        auto_mode(lines, options.getRandomCount(), options.isNumbersOnly());
+    }
+
+    if (!lines.empty()) {
+        save_file(lines, options.getFileName());
+    }
 
     return 0;
 }
