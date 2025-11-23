@@ -26,22 +26,23 @@ int main() {
     for (size_t i = 0; i < maxi; i++) {
         f.write(i, std::to_string(maxi - 1 - i));
     }
+    f.flush();
 
     createRunsInFile(f);
+    return 0;
 
     std::cout << "Stage 2: Merging runs" << std::endl;
 
-    std::vector<Buffer> buffers;
-    buffers.reserve(bufferCount);
+    std::vector<Buffer> buffers(bufferCount);
 
     BufferedFile t("temp/tempFile");
     BufferedFile* source = &f;
     BufferedFile* dest = &t;
 
     size_t totalPageCount = f.getPageCount();
-    size_t totalRecordCount = f.getRecordCount();
-    size_t runLenInPages = buffers.size();
-    size_t readPages = 0;
+    // size_t totalRecordCount = f.getRecordCount();
+    size_t runLenInPages = bufferCount;
+    // size_t readPages = 0;
 
     auto cmp = [&](auto& a, auto& b) {
         return buffers[a.first][a.second] > buffers[b.first][b.second];
@@ -51,28 +52,64 @@ int main() {
         std::vector<std::pair<size_t, size_t>>,
         decltype(cmp)>
         pq(cmp);
-    // size_t phaseCount = 0;
-
-    auto srcPages = source->pages();
-    auto dstPages = dest->pages();
+    size_t phaseCount = 0;
 
     // NOTE: Do until one run remains
-    while (runLenInPages * BufferedFile::recordsPerPage < totalRecordCount) {
-        srcPages = source->pages();
-        dstPages = dest->pages();
-        buffers.back() = dstPages;
-        // NOTE: Do one merge
+    while (runLenInPages < totalPageCount) {
+        auto srcPages = source->pages();
+        auto dstPages = dest->pages();
+        size_t readPages = 0;
+
+        std::cout << "One Phase Iteration" << std::endl;
+        std::cout << "phaseCount = " << phaseCount << std::endl;
+        std::cout << "dest = "
+                  << (dest == &f ? "temp/testFile.txt" : "temp/tempFile")
+                  << std::endl;
+        std::cout << "source = "
+                  << (source == &f ? "temp/testFile.txt" : "temp/tempFile")
+                  << std::endl;
+
+        // NOTE: Do one merge pass
         while (readPages < totalPageCount) {
-            // NOTE: Fill all buffers except the last one
-            for (size_t i = 0; i < buffers.size() - 1 || !srcPages.empty();
-                 i++) {
-                // NOTE: Initialize buffer with it's start and end page
-                buffers.emplace_back(
-                    srcPages.begin(),
-                    srcPages.advance(runLenInPages).begin()
+            std::cout << "One Merge" << std::endl;
+            std::cout << "readPages = " << readPages << std::endl;
+            std::cout << "readPages = " << readPages << std::endl;
+            buffers.clear();
+            size_t input_buffers_used = 0;
+
+            // NOTE: Fill all input buffers
+            for (size_t i = 0; i < bufferCount - 1; i++) {
+                if (srcPages.begin() == srcPages.end()) {
+                    break;
+                }
+
+                auto run_begin = srcPages.begin();
+                auto run_end = srcPages.begin();
+
+                size_t pages_in_this_run = std::min(
+                    (size_t)std::ranges::distance(srcPages),
+                    runLenInPages
                 );
-                // NOTE: Initialize pq with first element from each non-empty
-                // buffer
+                std::ranges::advance(run_end, pages_in_this_run);
+
+                buffers.emplace_back(run_begin, run_end);
+                input_buffers_used++;
+
+                srcPages = std::ranges::subrange(run_end, srcPages.end());
+            }
+
+            readPages = totalPageCount - std::ranges::distance(srcPages);
+
+            if (input_buffers_used == 0) {
+                break;
+            }
+
+            // Setup output buffer
+            buffers.emplace_back();
+            buffers.back() = dstPages;
+
+            // NOTE: Initialize pq with first element from each non-empty buffer
+            for (size_t i = 0; i < input_buffers_used; ++i) {
                 if (!buffers[i].empty()) {
                     pq.push({i, 0});
                 }
@@ -83,28 +120,20 @@ int main() {
                 auto [bufIdx, elemIdx] = pq.top();
                 pq.pop();
 
-                // NOTE: This should do buffered writes to the file
                 buffers.back().push_back(buffers[bufIdx][elemIdx]);
 
-                // NOTE: Add next element from same buffer
                 if (elemIdx + 1 < buffers[bufIdx].size()) {
                     pq.push({bufIdx, elemIdx + 1});
                 }
             }
-
-            for (auto& b : buffers) {
-                b.clear();
-            }
         }
 
-        runLenInPages *= buffers.size() - 1;
-        readPages = 0;
+        runLenInPages *= (bufferCount - 1);
 
         BufferedFile* temp = dest;
         dest = source;
         source = temp;
-
-        // phaseCount++;
+        phaseCount++;
     }
 
     std::cout << "Finished" << std::endl;
