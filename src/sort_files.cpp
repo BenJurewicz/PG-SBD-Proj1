@@ -107,10 +107,6 @@ int main() {
         // phaseCount++;
     }
 
-    // NOTE: Change BufferedFile so that reads returns a std::optional
-    // so it can fail if you leave the file and write will write anywhere in
-    // the already written section or directly after it
-
     std::cout << "Finished" << std::endl;
     std::cout << "Write Count: " << BufferedFile::writeCount << std::endl;
     std::cout << "Read Count: " << BufferedFile::readCout << std::endl;
@@ -122,10 +118,7 @@ void createRunsInFile(BufferedFile& f) {
 
     std::cout << "Stage 1: Divide into runs" << std::endl;
 
-    // auto [fBegin, fEnd] = f.pages();
-    auto p = f.pages() | std::views::drop(0);
-    auto fBegin = p.begin();
-    auto fEnd = p.end();
+    auto [fBegin, fEnd] = f.pages();
     bool isFileEmpty = false;
     size_t recordIndex = 0;
 
