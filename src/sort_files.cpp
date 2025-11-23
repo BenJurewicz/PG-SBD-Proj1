@@ -20,9 +20,9 @@ int main(int argc, char** argv) {
     BufferedFile::setRecordsPerPage(options.getBlockingFactor());
 
     BufferedFile f(options.getFileName());
-    std::cout << "Loaded file: " << options.getFileName() << std::endl;
-    f.printFileContent();
-    std::cout << std::endl;
+    // std::cout << "Loaded file: " << options.getFileName() << std::endl;
+    // f.printFileContent();
+    // std::cout << std::endl;
 
     createRunsInFile(f, options);
 
@@ -38,13 +38,13 @@ int main(int argc, char** argv) {
     auto b = static_cast<double>(options.getBlockingFactor());
     auto n = static_cast<double>(options.getBufferCount());
 
-    double theory = (2 * N) / (b * log(n)) * log(N / b);
+    double theory = std::floor((2 * N) / (b * log(n)) * log(N / b));
 
     std::cout << "Disk accesses in practice: "
               << BufferedFile::readCout + BufferedFile::writeCount << std::endl;
     std::cout << "Disk accesses in theory:" << theory << std::endl;
-    std::cout << "Sorted contents: " << std::endl;
-    f.printFileContent();
+    // std::cout << "Sorted contents: " << std::endl;
+    // f.printFileContent();
     return 0;
 }
 
