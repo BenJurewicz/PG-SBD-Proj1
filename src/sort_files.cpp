@@ -17,8 +17,6 @@ void createRunsInFile(BufferedFile& f);
 int main() {
     BufferedFile f("temp/testFile.txt");
 
-    // Buffer bf(f, 1, 1);
-
     size_t maxi = 100;
     for (size_t i = 0; i < maxi; i++) {
         f.write(i, std::to_string(maxi - 1 - i));
