@@ -19,11 +19,11 @@ int main() {
 
     // Buffer bf(f, 1, 1);
 
-    size_t maxi = 100;
-    for (size_t i = 0; i < maxi; i++) {
-        f.write(i, std::to_string(maxi - 1 - i));
-    }
-    f.flush();
+    // size_t maxi = 100;
+    // for (size_t i = 0; i < maxi; i++) {
+    //     f.write(i, std::to_string(maxi - 1 - i));
+    // }
+    // f.flush();
 
     createRunsInFile(f);
 
@@ -139,6 +139,8 @@ int main() {
 }
 
 // void readPagesIntoBuffers(std::vector < std::vector<Record> buffers) {}
+
+// void KWayMerge(std::vector<Buffer> inputBuffers, )
 
 void createRunsInFile(BufferedFile& f) {
     std::vector<std::vector<Record>> buffers(bufferCount);
