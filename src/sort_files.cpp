@@ -18,9 +18,9 @@ int main(int argc, char** argv) {
     BufferedFile::setRecordsPerPage(options.getBlockingFactor());
 
     BufferedFile f(options.getFileName());
-    if (options.isLogging()) {
-        std::cout << "Loaded file: " << options.getFileName() << std::endl;
-    }
+    std::cout << "Loaded file: " << options.getFileName() << std::endl;
+    f.printFileContent();
+    std::cout << std::endl;
 
     // size_t maxi = 100;
     // for (size_t i = 0; i < maxi; i++) {
@@ -31,14 +31,12 @@ int main(int argc, char** argv) {
     createRunsInFile(f, options);
 
     if (options.isLogging()) {
-        std::cout << "Stage 2: Merging runs" << std::endl;
+        std::cout << "Stage 2: Merging runs\n" << std::endl;
     }
-
     std::vector<Buffer> buffers(options.getBufferCount());
 
-    // BufferedFile t("temp/tempFile");
     TempFile t;
-    BufferedFile* source = &f;
+    BufferedFile* src = &f;
     BufferedFile* dest = &static_cast<BufferedFile&>(t);
 
     size_t totalPageCount = f.getPageCount();
@@ -53,32 +51,31 @@ int main(int argc, char** argv) {
         decltype(cmp)>
         pq(cmp);
 
-    size_t phaseCount = 0;
+    size_t mergeCount = 0;
 
     // NOTE: Do until one run remains
     while (runLenInPages < totalPageCount) {
-        auto srcPages = source->pages();
+        auto srcPages = src->pages();
         auto dstPages = dest->pages();
         size_t readPages = 0;
 
         if (options.isLogging()) {
-            std::cout << "\nPhase Iteration" << std::endl;
-            std::cout << "phaseCount = " << phaseCount << std::endl;
-            std::cout << "dest = "
-                      << (dest == &f ? "temp/testFile.txt" : "temp/tempFile")
+            std::cout << "Merge " << mergeCount++ << std::endl;
+            std::cout << "Merging " << options.getBufferCount() - 1
+                      << " runs of lenght "
+                      << runLenInPages * BufferedFile::recordsPerPage
                       << std::endl;
-            std::cout << "source = "
-                      << (source == &f ? "temp/testFile.txt" : "temp/tempFile")
+
+            std::cout << "dest = "
+                      << (dest == &f ? options.getFileName() : t.getFileName())
+                      << std::endl;
+            std::cout << "src = "
+                      << (src == &f ? options.getFileName() : t.getFileName())
                       << std::endl;
         }
 
         // NOTE: Do one merge pass
         while (readPages < totalPageCount) {
-            if (options.isLogging()) {
-                std::cout << "\nMerge" << std::endl;
-                std::cout << "Before Merge: readPages = " << readPages
-                          << std::endl;
-            }
             buffers.clear();
             size_t inputBuffersUsed = 0;
 
@@ -128,25 +125,25 @@ int main(int argc, char** argv) {
                     pq.push({bufIdx, elemIdx + 1});
                 }
             }
-            if (options.isLogging()) {
-                std::cout << "After Merge: readPages = " << readPages
-                          << std::endl;
-            }
+        }
+
+        if (options.isLogging()) {
+            std::cout << "File contents:" << std::endl;
+            dest->printFileContent();
         }
 
         runLenInPages *= (options.getBufferCount() - 1);
 
         BufferedFile* temp = dest;
-        dest = source;
-        source = temp;
-        phaseCount++;
+        dest = src;
+        src = temp;
     }
 
-    if (options.isLogging()) {
-        std::cout << "\nFinished" << std::endl;
-        std::cout << "Write Count: " << BufferedFile::writeCount << std::endl;
-        std::cout << "Read Count: " << BufferedFile::readCout << std::endl;
-    }
+    std::cout << "\nFinished" << std::endl;
+    std::cout << "Write Count: " << BufferedFile::writeCount << std::endl;
+    std::cout << "Read Count: " << BufferedFile::readCout << std::endl;
+    std::cout << "Sorted contents: " << std::endl;
+    f.printFileContent();
     return 0;
 }
 
@@ -218,6 +215,9 @@ void createRunsInFile(BufferedFile& f, const SortOptions& options) {
 
         if (options.isLogging()) {
             std::cout << "Run " << ++runCount << ":" << std::endl;
+            std::cout << "File contents:" << std::endl;
+            f.printFileContent();
+            std::cout << std::endl;
         }
     }
 }
