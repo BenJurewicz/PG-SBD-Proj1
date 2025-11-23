@@ -1,0 +1,9 @@
+
+
+Finished
+Write Count: 67380
+Read Count: 134760
+Phases Needed Actual: 4
+Phases Needed Theory: 3.30103
+Disk accesses in practice: 202140
+Disk accesses in theory:172041
