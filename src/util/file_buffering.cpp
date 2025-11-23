@@ -20,7 +20,7 @@
 size_t BufferedFile::readCout = 0;
 size_t BufferedFile::writeCount = 0;
 
-BufferedFile::BufferedFile(const char* fileName)
+BufferedFile::BufferedFile(const std::string fileName)
     : file(fileName, std::ios::in | std::ios::out) {
     // If file does not exist create it
     if (!file.is_open()) {

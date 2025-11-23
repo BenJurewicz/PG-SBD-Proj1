@@ -136,7 +136,7 @@ class BufferedFile {
 
     using BufferType = std::vector<Record>;
 
-    BufferedFile(const char* s);
+    BufferedFile(const std::string fileName);
     ~BufferedFile();
 
     Record read(size_t index);
