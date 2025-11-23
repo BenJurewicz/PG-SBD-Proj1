@@ -98,15 +98,17 @@ void SortOptions::checkRequired() const {
 
 void SortOptions::printHelpAndExit(int exitCode) const {
     // clang-format off
-    std::cout
-        << "Usage: " << scriptName << " [options] <fileName>\n"
-           "Options:\n"
-           "\t-h, --help\tShow this help message\n"
-           "\t-n, --bufferCount <value>\tSet buffer count (default: 5)\n"
-           "\t-b, --blockingFactor <value>\tSet blocking factor (default: 10)\n"
-           "\t-l, --logging\tDisable logging\n"
-           "Arguments:\n"
-           "\t<fileName>\tRequired: Path to the file to be sorted\n";
+    std::cout <<
+        "Usage: " << scriptName << " [options] <fileName>\n\n"
+        "Options:\n"
+        "\t-h, --help\tShow this help message\n\n"
+        "\t-n, --bufferCount <value>\n"
+        "\t\tSet buffer count (min: 2, default: 5)\n\n"
+        "\t-b, --blockingFactor <value>\n"
+        "\t\tSet blocking factor (min: 1, default: 10)\n\n"
+        "\t-l, --logging\tDisable logging\n\n"
+        "Arguments:\n"
+        "\t<fileName>\tRequired: Path to the file to be sorted\n";
     // clang-format on
     exit(exitCode);
 }

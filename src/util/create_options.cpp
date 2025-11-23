@@ -93,14 +93,17 @@ void CreateOptions::checkConstraints() const {
 
 void CreateOptions::printHelpAndExit(int exitCode) const {
     // clang-format off
-    std::cout
-        << "Usage: " << scriptName << " [options]\n"
-           "Options:\n"
-           "\t-h, --help\t\tShow this help message\n"
-           "\t-r, --random <count>\tGenerate <count> random records.\n"
-           "\t-n, --numbers-only\tGenerate only numbers (only with -r).\n"
-           "\t-f, --file <filename>\tSet output file (default: data/data.bin).\n"
-           "\t-i, --interactive\tEnter interactive mode to write records.\n";
+    std::cout <<
+        "Usage: " << scriptName << " [options]\n\n"
+        "Options:\n"
+        "\t-h, --help\t\tShow this help message\n\n"
+        "\t-r, --random <count>\tGenerate <count> random records.\n\n"
+        "\t-n, --numbers-only\n"
+        "\t\tGenerate only numbers (only with -r).\n\n"
+        "\t-f, --file <filename>\n"
+        "\t\tSet output file (default: data/data.bin).\n\n"
+        "\t-i, --interactive\n"
+        "\t\tEnter interactive mode to write records.\n";
     // clang-format on
     exit(exitCode);
 }
