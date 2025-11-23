@@ -153,14 +153,27 @@ size_t BufferedFile::getRecordCount() {
 
 void BufferedFile::printFileContent() {
     file.seekg(0);
+    std::size_t count = 0;
+    std::string tmp(Record::maxLen, '\0');
+    while (file.read(tmp.data(), Record::maxLen)) {
+        ++count;
+    }
+    file.clear();
 
+    std::size_t width =
+        count == 0
+            ? 1
+            : static_cast<std::size_t>(std::floor(std::log10(count))) + 1;
+
+    file.seekg(0);
     std::string emptyStr(recordSize, '\0');
     std::string currentStr = emptyStr;
     size_t i = 0;
     while (file.read(currentStr.data(), Record::maxLen)) {
-        std::cout << i++ << ". " << currentStr << std::endl;
+        std::cout << std::setw(width) << i++ << ". " << currentStr << '\n';
         currentStr = emptyStr;
     }
+    std::cout << std::flush;
     file.clear();
 }
 
