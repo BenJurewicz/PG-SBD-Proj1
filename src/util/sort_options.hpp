@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SORT_OPTIONS_HPP
+#define SORT_OPTIONS_HPP
 
 #include <cstddef>
 #include <string>
@@ -40,3 +41,5 @@ class SortOptions {
     std::string fileName;
     std::string scriptName;
 };
+
+#endif  // !SORT_OPTIONS_HPP
