@@ -1,21 +1,6 @@
-# Data type
+
+# Sorting Sequential Files using the method of merging with large buffers
+
+## Data type
 
 String with max length equal to 30
-
-## TODO
-
-Todo for today:
-
-
-- [ ] Fix the seekp/seekg trying to move behind EOF
-- [ ] Look at the warn in file_buffering.cpp and test it
-
-- [x] Program for creating Data
-  - [x] Manual data creation
-  - [x] Automatic data creation
-- [ ] Change the file creation such that each string is padded at the end
-        with null chars
-- [ ] Simulate Buffering
-  - [ ] Read data in buffers
-  - [ ] Write data in buffers
-- [ ] Sorting (We'll get to it when we get to it)
