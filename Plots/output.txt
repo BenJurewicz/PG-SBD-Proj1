@@ -1,0 +1,44 @@
+500:
+Generate command: ./out/create_files -r 500 -f "temp/t"
+Sort command: ./out/sort_files -b 50 -n 10 "temp/t" -l
+Write Count: 10
+Read Count: 21
+Sum: 31
+Phases Needed Actual: 0
+Phases Needed Theory: 0
+
+1000:
+Generate command: ./out/create_files -r 1000 -f "temp/t"
+Sort command: ./out/sort_files -b 50 -n 10 "temp/t" -l
+Write Count: 40
+Read Count: 80
+Sum: 120
+Phases Needed Actual: 1
+Phases Needed Theory: 1
+
+10000:
+Generate command: ./out/create_files -r 10000 -f "temp/t"
+Sort command: ./out/sort_files -b 50 -n 10 "temp/t" -l
+Write Count: 490
+Read Count: 980
+Sum: 1470
+Phases Needed Actual: 2
+Phases Needed Theory: 2
+
+100000:
+Generate command: ./out/create_files -r 100000 -f "temp/t"
+Sort command: ./out/sort_files -b 50 -n 10 "temp/t" -l
+Write Count: 6090
+Read Count: 12180
+Sum: 18270
+Phases Needed Actual: 3
+Phases Needed Theory: 3
+
+1000000:
+Generate command: ./out/create_files -r 1000000 -f "temp/t"
+Sort command: ./out/sort_files -b 50 -n 10 "temp/t" -l
+Write Count: 67380
+Read Count: 134760
+Sum: 202140
+Phases Needed Actual: 4
+Phases Needed Theory: 4
